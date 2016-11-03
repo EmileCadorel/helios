@@ -19,9 +19,9 @@ class MainActivity : Activity {
 				   "shaders/model.fs");
 
 	this._vertBinder = new VertexSpecification!Vertex (this._shader.program);
-	this._scene = new Scene ("models/Rock.blend", context.openglContext, this._vertBinder);
+	this._scene = new Scene ("models/rayman/Rayman3.obj", context, this._vertBinder);
 	this._camera = new Camera ();
-	this._camera.perspective (90. * PI / 180, 600./800., 0.1, 99999.);
+	this._camera.perspective (90. * PI / 180, 800./600., 0.1, 99999.);
 	
 	this._camera.lookAt (vec3f (0.0, 1.0, 4.0),
 			     vec3f (0.0, 1.0, 0.0),
@@ -34,8 +34,7 @@ class MainActivity : Activity {
 
     void resize (int width, int height) {
 	glViewport (0, 0, width, height);
-	this._camera.perspective (90. * PI / 180, cast(float)height / cast(float)width, 0.1, 99999.);
-	writeln ("ici", width, height);
+	this._camera.perspective (90. * PI / 180, cast(float)width / cast(float)height, 0.1, 99999.);
     }
     
     override void onUpdate () {

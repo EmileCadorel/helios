@@ -4,9 +4,9 @@
 	"copyright": "Copyright © 2016, emile",
 	"authors": ["emile"],
 	"dependencies": {
-	    "gfm:assimp" : "~>3.0.11",
-	    "gfm:opengl" : "~>3.0.11",
-	    "gfm:math" : "~>3.0.11",
-	    "gfm:sdl2" : "~>3.0.11"
+	    "gfm:assimp" : "~>6.2.0",
+	    "gfm:opengl" : "~>6.2.0",
+	    "gfm:math" : "~>6.2.0",
+	    "gfm:sdl2" : "~>6.2.0"
 	}
 }

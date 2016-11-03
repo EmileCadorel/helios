@@ -1,5 +1,5 @@
 module model.Scene;
-import model.Mesh, model.Vertex;
+import model.Mesh, model.Vertex, system.Application;
 import gfm.math, gfm.opengl, system.Shader;
 
 
@@ -8,7 +8,7 @@ class Scene {
     private mat4f _world;
     private Mesh _mesh;
 
-    this (string src, OpenGL context, VertexSpecification!Vertex binder) {
+    this (string src, Application context, VertexSpecification!Vertex binder) {
 	this._mesh = new Mesh (src, context, binder);
 	this._world = mat4f.identity ();
     }
@@ -57,6 +57,9 @@ class Scene {
 
     void draw (Shader shader) {
 	shader.uniform ("worldMatrix").set (this._world);
+	if (this._mesh.tex !is null) {
+	    this._mesh.tex.use (shader);
+	}
 	shader.use ();
 	this._mesh.draw ();
 	shader.unuse ();

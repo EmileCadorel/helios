@@ -22,11 +22,20 @@ class Shader {
 	string [] fragSource = this.readLines (this._fragFile);
 	auto vertShader = new GLShader (this._context, GL_VERTEX_SHADER);
 	vertShader.load (vertSource);
-	vertShader.compile ();
-	
+	try { vertShader.compile (); }
+	catch (OpenGLException e) {
+	    writeln (vertShader.getInfoLog ());
+	    throw e;
+	}
+	    
 	auto fragShader = new GLShader (this._context, GL_FRAGMENT_SHADER);
 	fragShader.load (fragSource);
-	fragShader.compile ();	
+	try {
+	    fragShader.compile ();
+	} catch (OpenGLException e) {
+	    writeln (fragShader.getInfoLog ());
+	    throw e;
+	}
 	
 	auto shaders = [vertShader, fragShader];
 	this._program = new GLProgram (this._context, shaders);
@@ -39,7 +48,7 @@ class Shader {
     auto uniform (string what) {
 	return this._program.uniform (what);
     }
-
+    
     void use () {
 	this._program.use ();
     }

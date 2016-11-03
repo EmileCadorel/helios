@@ -2,6 +2,7 @@ module system.Application;
 import system.Input, system.Window, system.Camera;
 import system.Timer, units.Second, system.Activity;
 import gfm.opengl, system.Configuration, std.conv : to;
+import gfm.sdl2;
 
 class Application {
 
@@ -59,6 +60,10 @@ class Application {
 	return this._window.context ();
     }
 
+    SDL2 sdlContext () {
+	return this._window.sdl ();
+    }
+    
     Input input () {
 	return this._input;
     }
