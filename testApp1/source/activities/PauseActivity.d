@@ -27,7 +27,7 @@ class PauseActivity : Activity {
     }
 
     override void onClose () {
-    }
-    
+	writeln ("Close " ~ typeid (this).toString);
+    }    
 
 }

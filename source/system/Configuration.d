@@ -6,8 +6,7 @@ struct Configuration {
     string name;
     int  width;
     int height;
-    string [] activities;
-    string mainAct = null;    
+    string [string] activities;
     
     this (string file) {
 	auto j = parseJSON (readText (file));
@@ -34,11 +33,11 @@ struct Configuration {
     private void parseActivities (JSONValue _value) {	
 	foreach (string key, value ; _value) {
 	    auto array = value.array ();
-	    if (array.length > 0 && array[0].str == "main") {
-		if (this.mainAct !is null) assert (false, "Plusieurs activité principale");
-		else this.mainAct = key;
-	    }
-	    this.activities ~= [key];
+	    if (array.length > 0) {
+		auto it = array [0].str in this.activities;
+		if (it !is null) assert (false, "Plusieurs fois l'intent " ~ array [0].str);
+		else this.activities [array [0].str] = key;
+	    } else assert (false, "Pas d'intent ");
 	}
     }
 

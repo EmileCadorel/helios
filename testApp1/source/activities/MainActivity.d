@@ -73,6 +73,14 @@ class MainActivity : Activity {
 	this._light.rotate (this._angles);
     }
     
+    override void onPause () {
+	writeln ("Pause " ~ typeid (this).toString);
+    }
+
+    override void onResume () {
+	writeln ("Pause " ~ typeid (this).toString);
+    }
+
     override void onDraw () {
 	this._shader.uniform ("lightPos").set (this._light.pos);
 	this._shader.uniform ("viewMatrix").set (this._camera.getV ());
@@ -85,7 +93,7 @@ class MainActivity : Activity {
     }
 
     override void onClose () {
-	
+	writeln ("Close " ~ typeid (this).toString);
     }
         
 }

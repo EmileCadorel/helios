@@ -2,17 +2,19 @@ module system.Application;
 import system.Input, system.Window, system.Camera;
 import system.Timer, units.Second, system.Activity;
 import gfm.opengl, system.Configuration, std.conv : to;
-import gfm.sdl2;
+import gfm.sdl2, system.Intent, std.container;
 
 class Application {
 
     private Timer _timer;
     private Window _window;
     private Input _input;
+    private Intent _intent;
+
     
     private float _fps;
     private bool _isRunning;
-    private Activity _current = null;
+    private Array!Activity _current;
     private Configuration _config;
     
     this (string configFile) {
@@ -26,28 +28,47 @@ class Application {
 
 	this._isRunning = true;
 	this._input.quit.connect (&this.stop);
-	this._current = cast(Activity) Object.factory (this._config.mainAct);
+	this._current.insertBack (cast(Activity) Object.factory (this._config.activities ["main"]));
     }
 
     void show () {
-	if (this._current !is null) {
-	    this._current.onCreate (this);
-	    
-	    while (this._isRunning) {
-		this._window.clear ();
-		this._input.poll ();
-		
-		this._current.onUpdate ();
-		this._current.onDraw ();
-		
-		this._window.swap ();
-		this.calcFrameStats ();
+	this._current.back (). onCreate (this);
+	
+	while (this._isRunning) {
+	    this._window.clear ();
+	    this._input.poll ();
+
+	    if (this._current.back.isClose ()) {
+		this._current.back.onClose ();
+		this._current.removeBack ();
+		if (this._current.length == 0) break;
+		else this._current.back.onResume ();
 	    }
 	    
-	    this._current.onClose ();
+	    this._current.back.onUpdate ();
+	    this._current.back.onDraw ();
+	    
+	    this._window.swap ();
+	    this.calcFrameStats ();
 	}
+	
+	foreach (it ; this._current) {
+	    it.onClose ();
+	}	
     }
     
+    void launch (string name) {
+	auto actName = name in this._config.activities;
+	if (actName is null) {
+	    assert (false, "Intent " ~ name ~ " n'existe pas");
+	} else {
+	    this._current.back ().onPause ();
+	    auto act = cast (Activity) Object.factory (*actName);
+	    act.onCreate (this);
+	    this._current.insertBack (act);
+	}
+    }
+
     float getFps () {
 	return this._fps;
     }
@@ -68,6 +89,10 @@ class Application {
 	return this._input;
     }
     
+    ref Intent intent () {
+	return this._intent;
+    }
+
     private void calcFrameStats () {
 	static int frameCount = 0;
 	frameCount ++;
