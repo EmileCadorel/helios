@@ -1,8 +1,9 @@
 {
-    "name" : "Application",
+    "name" : "Test App 1",
     "size" : { "width" : 800, "height" : 600 },
     "activities" : {
-	"activities.MainActivity.MainActivity" : ["main"]
+	"activities.MainActivity.MainActivity" : ["main"],
+	"activities.PauseActivity.PauseActivity" : ["pause"]
     }
 }
     

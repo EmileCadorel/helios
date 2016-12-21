@@ -49,6 +49,7 @@ class MainActivity : Activity {
 	this._lightDir = vec3f (-0.8, -2.0, -1.);
 	context.input.winResize.connect (&this.resize);
 	context.input.keyboard (KeyInfo (SDLK_ESCAPE, SDL_KEYDOWN)).connect (&this.end);
+	context.input.keyboard (KeyInfo (SDLK_c, SDL_KEYDOWN)).connect (&this.open);
     }
 
     void resize (int width, int height) {
@@ -56,6 +57,12 @@ class MainActivity : Activity {
 	this._camera.perspective (70. * PI / 180, cast(float)width / cast(float)height, 0.1, 99999.);
     }
 
+    void open (KeyInfo) {
+	auto intent = new Intent (this._context);
+	intent ["msg"] = "Salut";
+	intent.launch ("pause");
+    }
+    
     void end (KeyInfo) {
 	this._context.stop ();
     }

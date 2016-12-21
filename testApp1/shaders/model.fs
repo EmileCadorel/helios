@@ -30,18 +30,15 @@ vec4 pointLight(vec3 pos, vec3 normal, vec3 lightPos, vec3 diffuse, vec3 ambiant
 	if(lightInten > 0.0) {
 	    resDiff = diffuse * lightInten * 4;
 	    resDiff = clamp(resDiff, 0.0, 1.0);	    
-	    reflection = normalize(2 * lightInten * normal - lightDir);
-	    float power = pow(clamp(dot(reflection, eyePos), 0.0, 1.0), 1);
-	    spec = power * vec3(1, 0, 0);
 	}
 	
-	return vec4(ambiant + (resDiff + spec), 1.0);
+	return vec4(ambiant + resDiff, 1.0);
 
 }
 
 void main() {
     vec4 tex = texture (diffuse, textureCoords);
-    vec3 gamma = vec3(2.3 / 1.0);	
+    vec3 gamma = vec3(0.7 / 1.0);	
     color = pointLight (vecPos, vertexNormal, lightPos, vec3 (1, 1, 1), vec3 (0.0, 0.0, 0.0), eyePos) * tex;
     color = vec4 (pow (color.xyz, gamma), 1.0);
 }
