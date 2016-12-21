@@ -42,6 +42,10 @@ class Camera {
 	this._changed = true;
     }
 
+    vec3f eye () const {
+	return this._eye;
+    }
+    
     void target (vec3f target) {
 	this._target = target;
 	this._changed = true;

@@ -1,5 +1,6 @@
 module system.Input;
-import gfm.sdl2, std.container;
+public import gfm.sdl2;
+import std.container;
 
 struct KeyInfo {
     SDL_Keycode code;

@@ -17,6 +17,11 @@ class Scene {
 	this._mesh = mesh;
     }   
 
+    
+    Mesh mesh () {
+	return this._mesh;
+    }
+    
     public void rotate (float x, float y, float z) {
 	auto aux = mat4f.rotation (x, vec3f (1., 0., 0.));
 	aux *= mat4f.rotation (y, vec3f (0., 1., 0.));
