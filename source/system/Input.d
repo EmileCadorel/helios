@@ -43,14 +43,14 @@ class Input {
     }
 
     private Signal!KeyInfo [KeyInfo]  _keys;
-    private Signal!MouseEvent [MouseInfo] _mouse;
-    private Signal!MouseEvent _motion;
+    private Signal!(int, int, MouseInfo) [MouseInfo] _mouse;
+    private Signal!(int, int, MouseInfo) _motion;
     private Signal !(int, int) _resize;
     private Signal !() _quit;
     private bool [Uint32] _isDown;
 
     this () {
-	this._motion = new Signal!MouseEvent ();
+	this._motion = new Signal!(int, int, MouseInfo) ();
 	this._resize = new Signal!(int, int) ();
 	this._quit = new Signal!()();
     }
@@ -61,24 +61,31 @@ class Input {
 	    if(e.type == SDL_KEYDOWN) {
 		if (!isDown(e.key.keysym.sym)) {
 		    KeyInfo info = KeyInfo(e.key.keysym.sym, e.type);
+		    KeyInfo other = KeyInfo(e.key.keysym.sym, -1);
 		    auto sig = this.keyboard (info);
+		    auto sigother = this.keyboard (other);
 		    this._isDown [info.code] = true;
 		    sig(info);
+		    sigother (info);
 		}
 	    } else if (e.type == SDL_KEYUP) {
 		auto info = KeyInfo (e.key.keysym.sym, e.type);
+		auto other = KeyInfo (e.key.keysym.sym, -1);
 		auto sig = this.keyboard (info);
+		auto sigother = this.keyboard (other);
 		this._isDown [info.code] = false;
 		sig (info);
+		sigother (info);
 	    } else if (e.type == SDL_MOUSEBUTTONDOWN || e.type == SDL_MOUSEBUTTONUP) {
 		auto info = MouseInfo (e.button.button, e.type);
-		auto event = MouseEvent (e.button.x, e.button.y, info);
+		auto other = MouseInfo (e.button.button, -1);
 		auto sig = this.mouse (info);
-		sig(event);
+		auto sigother = this.mouse (other);
+		sig(e.button.x, e.button.y, info);
+		sigother (e.button.x, e.button.y, info);
 	    } else if (e.type == SDL_MOUSEMOTION) {
 		auto info = MouseInfo (0, e.type);
-		auto event = MouseEvent (e.motion.x, e.motion.y, info);
-		this._motion (event);
+		this._motion (e.motion.x, e.motion.y, info);
 	    } else if(e.type == SDL_QUIT) {
 		this._quit ();
 	    } else if (e.type == SDL_WINDOWEVENT) {
@@ -99,17 +106,17 @@ class Input {
 	}       
     }
     
-    Signal!(MouseEvent) mouse(MouseInfo info) {
+    Signal!(int, int, MouseInfo) mouse(MouseInfo info) {
 	auto it = (info in this._mouse);
 	if (it !is null) return *it;
 	else {
-	    auto ret = new Signal!MouseEvent;
+	    auto ret = new Signal!(int, int, MouseInfo);
 	    this._mouse [info] = ret;
 	    return ret;
 	}
     }
     
-    Signal!(MouseEvent) motion() {
+    Signal!(int, int, MouseInfo) motion() {
 	return this._motion;
     }
     

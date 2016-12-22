@@ -11,9 +11,7 @@ class PauseActivity : Activity {
 
     override void onCreate (Application context) {
 	context.input.keyboard (KeyInfo (SDLK_d, SDL_KEYDOWN)).connect (&this.close);
-	auto intent = context.intent;
-	writeln (intent.get!string ("msg"));
-	
+	auto intent = context.intent;	
     }
 
     void close (KeyInfo) {

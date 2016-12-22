@@ -3,7 +3,7 @@ import system.Activity, system.Shader, gfm.opengl;
 import system.Camera, system.Input;
 import gfm.math, std.math;
 import model.Vertex, model.Scene, std.stdio;
-import std.container, std.conv;
+import std.container, std.conv, std.stdio;
 
 struct Light {
 
@@ -26,8 +26,9 @@ class MainActivity : Activity {
     Camera _camera;
     vec3f _angles, _lightDir;
     Application _context;
+    bool _zoom, _unzoom;
     Light _light;
-
+    TPSGuide _guide;
     
     override void onCreate (Application context) {
 	this._context = context;
@@ -41,6 +42,8 @@ class MainActivity : Activity {
 	this._camera = new Camera ();
 	this._camera.perspective (70. * PI / 180, 800./600., 0.1, 99999.);
 	
+	this._camera.guide = this._guide = new TPSGuide (context);
+
 	this._camera.lookAt (vec3f (0, 4, 7),
 			     vec3f (0, 1, 0),
 			     vec3f (0.0, 1., 0.));
@@ -48,8 +51,9 @@ class MainActivity : Activity {
 	this._angles = vec3f (0.0, 1. / 60., 0.);
 	this._lightDir = vec3f (-0.8, -2.0, -1.);
 	context.input.winResize.connect (&this.resize);
-	context.input.keyboard (KeyInfo (SDLK_ESCAPE, SDL_KEYDOWN)).connect (&this.end);
-	context.input.keyboard (KeyInfo (SDLK_c, SDL_KEYDOWN)).connect (&this.open);
+	context.input.keyboard (KeyInfo (SDLK_ESCAPE, -1)).connect (&this.end);
+	context.input.keyboard (KeyInfo (SDLK_z, -1)).connect (&this.zoom);
+	context.input.keyboard (KeyInfo (SDLK_u, -1)).connect (&this.unzoom);
     }
 
     void resize (int width, int height) {
@@ -63,13 +67,24 @@ class MainActivity : Activity {
 	intent.launch ("pause");
     }
     
-    void end (KeyInfo) {
-	this._context.stop ();
+    void end (KeyInfo info) {
+	if (info.type == SDL_KEYUP) 
+	    this._context.stop ();
+	else
+	    writeln ("Echap appuyé");
+    }
+
+    void zoom (KeyInfo info) {
+	this._zoom = info.type == SDL_KEYDOWN;
+    }
+
+    void unzoom (KeyInfo info) {
+	this._unzoom = info.type == SDL_KEYDOWN;
     }
     
     override void onUpdate () {
-	foreach (it ; this._scenes)
-	    it.rotate (this._angles);
+	if (this._zoom) this._guide.zoom ();
+	else if (this._unzoom) this._guide.unzoom ();
 	this._light.rotate (this._angles);
     }
     
