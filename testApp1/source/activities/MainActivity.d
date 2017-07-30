@@ -54,6 +54,7 @@ class MainActivity : Activity {
 	context.input.keyboard (KeyInfo (SDLK_ESCAPE, -1)).connect (&this.end);
 	context.input.keyboard (KeyInfo (SDLK_z, -1)).connect (&this.zoom);
 	context.input.keyboard (KeyInfo (SDLK_u, -1)).connect (&this.unzoom);
+	context.input.keyboard (KeyInfo (SDLK_p, SDL_KEYDOWN)).connect (&this.open);
     }
 
     void resize (int width, int height) {
@@ -96,7 +97,12 @@ class MainActivity : Activity {
 	writeln ("Pause " ~ typeid (this).toString);
     }
 
-    override void onDraw () {
+    override void onDraw2D () {
+	// this._context.sdlRenderer.fillRect (0, 0, 50, 50);
+	// this._context.sdlRenderer.present ();
+    }
+    
+    override void onDraw () {	
 	this._shader.uniform ("lightPos").set (this._light.pos);
 	this._shader.uniform ("viewMatrix").set (this._camera.getV ());
 	this._shader.uniform ("projectionMatrix").set (this._camera.getP ());

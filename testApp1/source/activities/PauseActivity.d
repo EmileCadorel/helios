@@ -8,7 +8,6 @@ import std.stdio;
 
 class PauseActivity : Activity {
 
-
     override void onCreate (Application context) {
 	context.input.keyboard (KeyInfo (SDLK_d, SDL_KEYDOWN)).connect (&this.close);
 	auto intent = context.intent;	

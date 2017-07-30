@@ -7,6 +7,7 @@ class Window {
 
     private SDL2 _sdl2;
     private OpenGL _gl;
+    private SDL2Renderer _sdlRender;
     private SDL2Window _window;
     private int _width, _height;
     private string _title;
@@ -25,19 +26,19 @@ class Window {
     
     private void initWindow (int width, int height) {
 	this._sdl2 = new SDL2 (null);
-	this._gl = new OpenGL (null);	
-
+	this._gl = new OpenGL (null);
+	
 	this._sdl2.subSystemInit (SDL_INIT_VIDEO);
-	this._sdl2.subSystemInit (SDL_INIT_EVENTS);     
+	this._sdl2.subSystemInit (SDL_INIT_EVENTS);
+	
+	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 2);
+	SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
+	SDL_GL_SetAttribute (SDL_GL_MULTISAMPLESAMPLES, 8);	
 
 	SDL_GL_SetAttribute (SDL_GL_CONTEXT_MAJOR_VERSION, 3);
 	SDL_GL_SetAttribute (SDL_GL_CONTEXT_MINOR_VERSION, 3);
 	SDL_GL_SetAttribute (SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
-
-	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 2);
-	SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
-	SDL_GL_SetAttribute (SDL_GL_MULTISAMPLESAMPLES, 8);
-	
+		
 	const windowFlags = SDL_WINDOW_SHOWN |
 	    SDL_WINDOW_INPUT_FOCUS |
 	    SDL_WINDOW_MOUSE_FOCUS |
@@ -54,7 +55,8 @@ class Window {
 				       this._width,
 				       windowFlags);
 
-	this._window.setTitle (this._title);
+	this._window.setTitle (this._title);       
+
 	this._gl.reload ();
 	this._gl.debugCheck ();
 	this.defaultGLContext ();
@@ -70,6 +72,9 @@ class Window {
 	 glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);*/
     }
 
+    private void defaultSDLContext () {
+    }
+    
     void setTitle (string name) {
 	this._title = name;
 	this._window.setTitle (name);
@@ -83,12 +88,17 @@ class Window {
 	return this._gl;
     }
 
+    SDL2Renderer sdlRenderer () {
+	return this._sdlRender;
+    }
+    
     SDL2 sdl () {
 	return this._sdl2;
     }
     
     void clear () {
 	glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	//this._sdlRender.clear ();
     }
     
     void swap () {

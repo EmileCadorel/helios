@@ -17,8 +17,17 @@ struct MouseEvent {
     MouseInfo info;
 }
 
+
 class Input {
 
+    struct InputConnections { 
+	Signal!KeyInfo [KeyInfo]  keys;
+	Signal!(int, int, MouseInfo) [MouseInfo] mouse;
+	Signal!(int, int, MouseInfo) motion;
+	Signal !(int, int) resize;
+	Signal !() quit;   
+    }
+    
     class Signal (Type...) {
 	alias SlotDel = void delegate (Type);
 	alias SlotFunc = void function (Type);
@@ -42,17 +51,14 @@ class Input {
 	}		
     }
 
-    private Signal!KeyInfo [KeyInfo]  _keys;
-    private Signal!(int, int, MouseInfo) [MouseInfo] _mouse;
-    private Signal!(int, int, MouseInfo) _motion;
-    private Signal !(int, int) _resize;
-    private Signal !() _quit;
+    private SList!InputConnections _connects;
     private bool [Uint32] _isDown;
 
     this () {
-	this._motion = new Signal!(int, int, MouseInfo) ();
-	this._resize = new Signal!(int, int) ();
-	this._quit = new Signal!()();
+	this._connects.insertFront (InputConnections ());
+	this._connects.front.motion = new Signal!(int, int, MouseInfo) ();
+	this._connects.front.resize = new Signal!(int, int) ();
+	this._connects.front.quit = new Signal!()();
     }
     
     void poll () {
@@ -85,47 +91,47 @@ class Input {
 		sigother (e.button.x, e.button.y, info);
 	    } else if (e.type == SDL_MOUSEMOTION) {
 		auto info = MouseInfo (0, e.type);
-		this._motion (e.motion.x, e.motion.y, info);
+		this._connects.front.motion (e.motion.x, e.motion.y, info);
 	    } else if(e.type == SDL_QUIT) {
-		this._quit ();
+		this._connects.front.quit ();
 	    } else if (e.type == SDL_WINDOWEVENT) {
 		if(e.window.event == SDL_WINDOWEVENT_SIZE_CHANGED) {
-		    this._resize (e.window.data1, e.window.data2);
+		    this._connects.front.resize (e.window.data1, e.window.data2);
 		}
 	    }
 	}	
     }
 
     Signal!KeyInfo keyboard(KeyInfo info) {
-	auto it = (info in this._keys);
+	auto it = (info in this._connects.front.keys);
 	if (it !is null) return *it;
 	else {
 	    auto ret = new Signal!KeyInfo;
-	    this._keys [info] = ret;
+	    this._connects.front.keys [info] = ret;
 	    return ret;
 	}       
     }
     
     Signal!(int, int, MouseInfo) mouse(MouseInfo info) {
-	auto it = (info in this._mouse);
+	auto it = (info in this._connects.front.mouse);
 	if (it !is null) return *it;
 	else {
 	    auto ret = new Signal!(int, int, MouseInfo);
-	    this._mouse [info] = ret;
+	    this._connects.front.mouse [info] = ret;
 	    return ret;
 	}
     }
     
     Signal!(int, int, MouseInfo) motion() {
-	return this._motion;
+	return this._connects.front.motion;
     }
     
     Signal!(int, int) winResize() {
-	return this._resize;
+	return this._connects.front.resize;
     }
 
     Signal!() quit () {
-	return this._quit;
+	return this._connects.front.quit;
     }
     
     private bool isDown (SDL_Keycode code) {
@@ -134,7 +140,23 @@ class Input {
 	else return false;
     }
 
+    void store () {
+	this._connects.insertFront (InputConnections());
+    }
+
+    void backup () {
+	if (!this._connects.empty)
+	    this._connects.removeFront ();
+	
+	if (this._connects.empty) 
+	    this._connects.insertFront (InputConnections ());
+    }
+    
     void clear () {
+	if (!this._connects.empty) {
+	    this._connects.removeFront ();
+	    this._connects.insertFront (InputConnections());	    
+	}
     }
     
 }

@@ -15,6 +15,8 @@ abstract class Activity {
     
     void onUpdate ();
 
+    void onDraw2D () {}
+    
     void onDraw ();
     
     void onClose ();

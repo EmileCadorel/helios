@@ -11,7 +11,6 @@ class Application {
     private Input _input;
     private Intent _intent;
 
-    
     private float _fps;
     private bool _isRunning;
     private Array!Activity _current;
@@ -35,10 +34,11 @@ class Application {
 	this._current.back (). onCreate (this);
 	
 	while (this._isRunning) {
-	    this._window.clear ();
 	    this._input.poll ();
+	    this._window.clear ();
 
 	    if (this._current.back.isClose ()) {
+		this._input.backup ();
 		this._current.back.onClose ();
 		this._current.removeBack ();
 		if (this._current.length == 0) break;
@@ -46,6 +46,9 @@ class Application {
 	    }
 	    
 	    this._current.back.onUpdate ();
+	    this._current.back.onDraw2D ();
+	    //this._window.sdlRenderer.present ();
+
 	    this._current.back.onDraw ();
 	    
 	    this._window.swap ();
@@ -63,6 +66,7 @@ class Application {
 	    assert (false, "Intent " ~ name ~ " n'existe pas");
 	} else {
 	    this._current.back ().onPause ();
+	    this._input.store ();
 	    auto act = cast (Activity) Object.factory (*actName);
 	    act.onCreate (this);
 	    this._current.insertBack (act);
@@ -79,6 +83,10 @@ class Application {
 
     OpenGL openglContext () {
 	return this._window.context ();
+    }
+        
+    SDL2Renderer sdlRenderer () {
+	return this._window.sdlRenderer;
     }
 
     SDL2 sdlContext () {
