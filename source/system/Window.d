@@ -7,7 +7,7 @@ class Window {
 
     private SDL2 _sdl2;
     private OpenGL _gl;
-    private SDL2Renderer _sdlRender;
+    private SDLTTF _sdlTtf;
     private SDL2Window _window;
     private int _width, _height;
     private string _title;
@@ -45,14 +45,14 @@ class Window {
 	    SDL_WINDOW_RESIZABLE |
 	    SDL_WINDOW_OPENGL;
 
-	this._width = height;
-	this._height = width;
+	this._width = width;
+	this._height = height;
 	
 	this._window = new SDL2Window (this._sdl2,
 				       SDL_WINDOWPOS_UNDEFINED,
 				       SDL_WINDOWPOS_UNDEFINED,
-				       this._height,
 				       this._width,
+				       this._height,
 				       windowFlags);
 
 	this._window.setTitle (this._title);       
@@ -60,6 +60,7 @@ class Window {
 	this._gl.reload ();
 	this._gl.debugCheck ();
 	this.defaultGLContext ();
+	this._sdlTtf = new SDLTTF (this._sdl2);
     }
       
     private void defaultGLContext () {
@@ -68,8 +69,8 @@ class Window {
 	glEnable (GL_CULL_FACE);
 	glCullFace (GL_BACK);
 	glEnable(GL_MULTISAMPLE);
-	/*glEnable(GL_BLEND);
-	 glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);*/
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     }
 
     private void defaultSDLContext () {
@@ -87,24 +88,45 @@ class Window {
     OpenGL context () {
 	return this._gl;
     }
-
-    SDL2Renderer sdlRenderer () {
-	return this._sdlRender;
-    }
     
     SDL2 sdl () {
 	return this._sdl2;
     }
+
+    SDLTTF sdlTtf () {
+	return this._sdlTtf;
+    }
+    
+    SDL2Surface surface () {
+	return this._window.surface;
+    }
+
+    @property ref int width () {
+	return this._width;
+    }
+
+    @property ref int height () {
+	return this._height;
+    }
     
     void clear () {
 	glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	//this._sdlRender.clear ();
     }
     
     void swap () {
 	this._window.swapBuffers ();
     }
     
+    void set2DRendering () {
+	glDisable(GL_CULL_FACE);
+	glDisable(GL_DEPTH_TEST);
+    }
+
+    void set3DRendering() {
+	glEnable(GL_CULL_FACE);
+	glEnable(GL_DEPTH_TEST);        
+    }
+
     ~this () {
 	this._gl.destroy ();
 	this._sdl2.destroy ();

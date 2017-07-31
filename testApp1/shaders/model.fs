@@ -4,6 +4,7 @@ uniform vec3 lightDir;
 uniform sampler2D diffuse;
 uniform vec3 eyePos;
 uniform vec3 lightPos;
+uniform vec3 ambiant;
 
 in vec3 vertexNormal;
 in vec2 textureCoords;
@@ -39,6 +40,6 @@ vec4 pointLight(vec3 pos, vec3 normal, vec3 lightPos, vec3 diffuse, vec3 ambiant
 void main() {
     vec4 tex = texture (diffuse, textureCoords);
     vec3 gamma = vec3(0.7 / 1.0);	
-    color = pointLight (vecPos, vertexNormal, lightPos, vec3 (1, 1, 1), vec3 (0.0, 0.0, 0.0), eyePos) * tex;
+    color = (vec4 (ambiant, 1.0) + pointLight (vecPos, vertexNormal, lightPos, vec3 (1, 1, 1), vec3 (0.0, 0.0, 0.0), eyePos)) * tex;
     color = vec4 (pow (color.xyz, gamma), 1.0);
 }

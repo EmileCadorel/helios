@@ -17,7 +17,6 @@ class Mesh {
     static this () {
 	_assimp_ = new Assimp (null);
     }
-
     
     this (string src, Application context, VertexSpecification!Vertex binder) {
 	this._vao = new GLVAO (context.openglContext);
@@ -25,6 +24,17 @@ class Mesh {
 	this.init (src, context);
     }
 
+    this (Vertex [] model, Application context, VertexSpecification!Vertex binder) {
+	this._vao = new GLVAO (context.openglContext);
+	this._modelVS = binder;
+	this._modelVBO = new GLBuffer (context.openglContext, GL_ARRAY_BUFFER, GL_STATIC_DRAW);
+	this._modelVBO.setData (model);
+	this._vao.bind ();
+	this._modelVBO.bind ();
+	this._modelVS.use ();
+	this._vao.unbind ();
+    }
+    
     public void draw () {
 	this._vao.bind ();
 	glDrawArrays (GL_TRIANGLES, 0, cast(int)(this._modelVBO.size() / this._modelVS.vertexSize ()));
@@ -75,7 +85,7 @@ class Mesh {
 	this._vao.unbind ();		
     }
     
-    Texture tex () {
+    ref Texture tex () {
 	return this._tex;
     }
     

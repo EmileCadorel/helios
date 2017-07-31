@@ -4,6 +4,7 @@ import system.Camera, system.Input;
 import gfm.math, std.math;
 import model.Vertex, model.Scene, std.stdio;
 import std.container, std.conv, std.stdio;
+import draw.PostProcessing, draw.Text;
 
 struct Light {
 
@@ -18,6 +19,8 @@ struct Light {
 
 }
 
+
+
 class MainActivity : Activity {
 
     Shader _shader;
@@ -25,10 +28,13 @@ class MainActivity : Activity {
     Array!Scene _scenes;
     Camera _camera;
     vec3f _angles, _lightDir;
+    vec3f _ambiant;
     Application _context;
     bool _zoom, _unzoom;
     Light _light;
     TPSGuide _guide;
+
+    Text _text;
     
     override void onCreate (Application context) {
 	this._context = context;
@@ -50,6 +56,12 @@ class MainActivity : Activity {
 	
 	this._angles = vec3f (0.0, 1. / 60., 0.);
 	this._lightDir = vec3f (-0.8, -2.0, -1.);
+	this._ambiant = vec3f (0.3, 0.3, 0.3);
+
+	this._text = new Text (context, "fonts/Font.ttf", 15);
+	this._text.text = "Hello World!!";
+	this._text.position = vec2f (15, 100);
+	
 	context.input.winResize.connect (&this.resize);
 	context.input.keyboard (KeyInfo (SDLK_ESCAPE, -1)).connect (&this.end);
 	context.input.keyboard (KeyInfo (SDLK_z, -1)).connect (&this.zoom);
@@ -84,9 +96,16 @@ class MainActivity : Activity {
     }
     
     override void onUpdate () {
-	if (this._zoom) this._guide.zoom ();
+	import std.conv;
+	static float lastFps;
+	
+	if (this._zoom) this._guide.zoom ();	
 	else if (this._unzoom) this._guide.unzoom ();
 	this._light.rotate (this._angles);
+	if (this._context.getFps != lastFps) {
+	    this._text.text = "FPS : " ~ this._context.getFps ().to!string;
+	    lastFps = this._context.getFps;
+	}
     }
     
     override void onPause () {
@@ -98,19 +117,18 @@ class MainActivity : Activity {
     }
 
     override void onDraw2D () {
-	// this._context.sdlRenderer.fillRect (0, 0, 50, 50);
-	// this._context.sdlRenderer.present ();
+	this._text.draw ();
     }
     
     override void onDraw () {	
+	this._shader.uniform ("ambiant").set (this._ambiant);
 	this._shader.uniform ("lightPos").set (this._light.pos);
 	this._shader.uniform ("viewMatrix").set (this._camera.getV ());
 	this._shader.uniform ("projectionMatrix").set (this._camera.getP ());
 	this._shader.uniform ("eyePos").set (this._camera.eye);
 
 	foreach (it ; this._scenes) 
-	    it.draw (this._shader);
-	
+	it.draw (this._shader);
     }
 
     override void onClose () {

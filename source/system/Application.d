@@ -32,6 +32,7 @@ class Application {
 
     void show () {
 	this._current.back (). onCreate (this);
+	this._input.winResize.connect (&this.resize);
 	
 	while (this._isRunning) {
 	    this._input.poll ();
@@ -46,10 +47,12 @@ class Application {
 	    }
 	    
 	    this._current.back.onUpdate ();
-	    this._current.back.onDraw2D ();
-	    //this._window.sdlRenderer.present ();
 
+	    this._window.set3DRendering ();
 	    this._current.back.onDraw ();
+	    
+	    this._window.set2DRendering ();
+	    this._current.back.onDraw2D ();
 	    
 	    this._window.swap ();
 	    this.calcFrameStats ();
@@ -58,6 +61,11 @@ class Application {
 	foreach (it ; this._current) {
 	    it.onClose ();
 	}	
+    }
+
+    void resize (int width, int height) {
+	this._window.width = width;
+	this._window.height = height;
     }
     
     void launch (string name) {
@@ -85,16 +93,20 @@ class Application {
 	return this._window.context ();
     }
         
-    SDL2Renderer sdlRenderer () {
-	return this._window.sdlRenderer;
+    SDLTTF sdlTtf () {
+	return this._window.sdlTtf ();
     }
-
+    
     SDL2 sdlContext () {
 	return this._window.sdl ();
     }
     
     Input input () {
 	return this._input;
+    }
+
+    Window window () {
+	return this._window;
     }
     
     ref Intent intent () {
@@ -111,7 +123,7 @@ class Application {
 	    this._fps = cast (float) frameCount;
 	    frameCount = 0;
 
-	    this._window.setTitle (this._config.name ~ " - " ~ to!string (this._fps));
+	    //this._window.setTitle (this._config.name ~ " - " ~ to!string (this._fps));
 	}
     }
 
