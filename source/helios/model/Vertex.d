@@ -1,4 +1,4 @@
-module model.Vertex;
+module helios.model.Vertex;
 import gfm.opengl, gfm.math;
 
 struct Vertex {

@@ -1,4 +1,4 @@
-module utils.Singleton;
+module helios.utils.Singleton;
 
 /++
  + mixin permettant a une classe de devenir Singleton

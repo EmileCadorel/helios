@@ -1,5 +1,5 @@
-module system.Camera;
-import system.Application, system.Input;
+module helios.system.Camera;
+import helios.system._;
 import gfm.opengl, gfm.math, std.math;
 
 class Guide {

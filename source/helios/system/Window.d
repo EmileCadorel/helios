@@ -1,4 +1,4 @@
-module system.Window;
+module helios.system.Window;
 import gfm.math, gfm.sdl2, gfm.opengl;
 import std.file, std.path;
 import std.stdio;

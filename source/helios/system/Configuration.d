@@ -1,4 +1,4 @@
-module system.Configuration;
+module helios.system.Configuration;
 import std.json, std.file, std.conv, std.stdio;
 
 struct Configuration {

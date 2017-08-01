@@ -1,6 +1,6 @@
-module model.Mesh;
-import system.Shader, system.Application;
-import model.Vertex, model.Texture;
+module helios.model.Mesh;
+import helios.system._;
+import helios.model._;
 import gfm.math, gfm.opengl, gfm.assimp;
 import derelict.assimp3.assimp, std.conv, std.stdio, std.path;
 import std.container;

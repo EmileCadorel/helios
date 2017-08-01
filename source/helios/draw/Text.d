@@ -1,10 +1,8 @@
-module draw.Text;
-import gfm.sdl2, system.Application;
+module helios.draw.Text;
+import gfm.sdl2, helios.system._;
 import std.stdio;
-import model.Vertex;
-import model.Texture, model.Mesh;
+import helios.model._;
 import gfm.math, gfm.opengl, gfm.assimp;
-import system.Shader;
 
 private auto vert = q{
 #version 450 core

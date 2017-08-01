@@ -1,5 +1,5 @@
-module system.Shader;
-import system.Window;
+module helios.system.Shader;
+import helios.system.Window;
 import gfm.opengl, gfm.math;
 import std.stdio, std.algorithm, std.conv, std.array;
 

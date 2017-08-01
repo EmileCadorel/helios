@@ -1,6 +1,6 @@
-module system.Timer;
+module helios.system.Timer;
 import gfm.sdl2;
-import units.Second;
+import helios.units.Second;
 
 
 class Timer {

@@ -1,6 +1,6 @@
-module model.Scene;
-import model.Mesh, model.Vertex, system.Application;
-import gfm.math, gfm.opengl, system.Shader;
+module helios.model.Scene;
+import helios.model._, helios.system._;
+import gfm.math, gfm.opengl, helios.system.Shader;
 
 
 class Scene {

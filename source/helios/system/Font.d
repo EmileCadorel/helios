@@ -1,6 +1,6 @@
-module system.Font;
-import gfm.sdl2, system.Application;
-import utils.Singleton;
+module helios.system.Font;
+import gfm.sdl2, helios.system._;
+import helios.utils.Singleton;
 
 class Font {
 

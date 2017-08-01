@@ -1,8 +1,6 @@
 module activities.PauseActivity;
-import system.Activity, system.Shader, gfm.opengl;
-import system.Camera, system.Input;
+import helios._;
 import gfm.math, std.math;
-import model.Vertex, model.Scene, std.stdio;
 import std.container, std.conv;
 import std.stdio;
 

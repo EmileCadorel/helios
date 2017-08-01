@@ -1,10 +1,7 @@
 module activities.MainActivity;
-import system.Activity, system.Shader, gfm.opengl;
-import system.Camera, system.Input;
+import helios._, gfm.opengl;
 import gfm.math, std.math;
-import model.Vertex, model.Scene, std.stdio;
 import std.container, std.conv, std.stdio;
-import draw.PostProcessing, draw.Text;
 
 struct Light {
 
@@ -18,8 +15,6 @@ struct Light {
     }    
 
 }
-
-
 
 class MainActivity : Activity {
 

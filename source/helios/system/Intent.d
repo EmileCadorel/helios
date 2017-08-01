@@ -1,5 +1,5 @@
-module system.Intent;
-import system.Application;
+module helios.system.Intent;
+import helios.system.Application;
 
 class Intent {
 

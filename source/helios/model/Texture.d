@@ -1,6 +1,6 @@
-module model.Texture;
-import system.Application;
-import gfm.opengl, std.typecons, system.Shader;
+module helios.model.Texture;
+import helios.system._;
+import gfm.opengl, std.typecons;
 import gfm.sdl2, std.conv;
 
 class Texture {

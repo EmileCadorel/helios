@@ -1,8 +1,7 @@
-module system.Application;
-import system.Input, system.Window, system.Camera;
-import system.Timer, units.Second, system.Activity;
-import gfm.opengl, system.Configuration, std.conv : to;
-import gfm.sdl2, system.Intent, std.container;
+module helios.system.Application;
+import helios.system._, helios.units._;
+import gfm.opengl, std.conv : to;
+import gfm.sdl2, std.container;
 
 class Application {
 

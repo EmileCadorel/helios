@@ -1,4 +1,4 @@
-module system.Input;
+module helios.system.Input;
 public import gfm.sdl2;
 import std.container;
 
