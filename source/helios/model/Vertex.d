@@ -6,3 +6,8 @@ struct Vertex {
     vec3f normal;
     vec2f texcoord;
 }
+
+struct Vertex2D {
+    vec3f position;
+    vec2f texcoord;
+}

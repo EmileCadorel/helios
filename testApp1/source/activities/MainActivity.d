@@ -28,6 +28,7 @@ class MainActivity : Activity {
     bool _zoom, _unzoom;
     Light _light;
     TPSGuide _guide;
+    FloatingBox _box;
 
     Text _text;
     
@@ -53,9 +54,11 @@ class MainActivity : Activity {
 	this._lightDir = vec3f (-0.8, -2.0, -1.);
 	this._ambiant = vec3f (0.3, 0.3, 0.3);
 
-	this._text = new Text (context, "fonts/Font.ttf", 15);
+	this._text = new Text ("fonts/Unispace.ttf", 25);
 	this._text.text = "Hello World!!";
 	this._text.position = vec2f (15, 100);
+
+	this._box = new FloatingBox (vec2f (1, 1), vec2f(100, 100), "hehe");	
 	
 	context.input.winResize.connect (&this.resize);
 	context.input.keyboard (KeyInfo (SDLK_ESCAPE, -1)).connect (&this.end);
@@ -98,7 +101,7 @@ class MainActivity : Activity {
 	else if (this._unzoom) this._guide.unzoom ();
 	this._light.rotate (this._angles);
 	if (this._context.getFps != lastFps) {
-	    this._text.text = "FPS : " ~ this._context.getFps ().to!string;
+	    this._text.text = "Fps : " ~ this._context.getFps ().to!string;
 	    lastFps = this._context.getFps;
 	}
     }
@@ -113,6 +116,7 @@ class MainActivity : Activity {
 
     override void onDraw2D () {
 	this._text.draw ();
+	this._box.draw ();
     }
     
     override void onDraw () {	

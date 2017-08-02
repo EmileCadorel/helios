@@ -14,6 +14,8 @@ class Application {
     private bool _isRunning;
     private Array!Activity _current;
     private Configuration _config;
+
+    private static Application __instance__;
     
     this (string configFile) {
 	this._config = Configuration (configFile);
@@ -27,6 +29,9 @@ class Application {
 	this._isRunning = true;
 	this._input.quit.connect (&this.stop);
 	this._current.insertBack (cast(Activity) Object.factory (this._config.activities ["main"]));
+	if (!__instance__) 
+	    __instance__ = this;
+	else assert (false, "Multiple App");	
     }
 
     void show () {
@@ -126,5 +131,8 @@ class Application {
 	}
     }
 
+    static Application currentContext () {
+	return __instance__;
+    }
 
 }

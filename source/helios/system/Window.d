@@ -120,11 +120,14 @@ class Window {
     void set2DRendering () {
 	glDisable(GL_CULL_FACE);
 	glDisable(GL_DEPTH_TEST);
+	glEnable (GL_POLYGON_SMOOTH);
+	glEnable (GL_MULTISAMPLE);
     }
 
     void set3DRendering() {
 	glEnable(GL_CULL_FACE);
-	glEnable(GL_DEPTH_TEST);        
+	glEnable(GL_DEPTH_TEST);
+	glDisable (GL_POLYGON_SMOOTH);
     }
 
     ~this () {

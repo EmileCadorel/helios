@@ -84,6 +84,19 @@ class Mesh {
 	this._modelVS.use ();
 	this._vao.unbind ();		
     }
+
+    static Mesh createQuad (T) (Application context, VertexSpecification!T spec, vec2f size) {
+	auto model = [
+	    Vertex (vec3f (0, 0, 0), vec3f (), vec2f (0, 0)),
+	    Vertex (vec3f (0, size.y, 0), vec3f (), vec2f (0, 1)),	    
+	    Vertex (vec3f (size.x, 0, 0), vec3f (), vec2f (1, 0)),
+	    Vertex (vec3f (size.x, 0, 0), vec3f (), vec2f (1, 0)),
+	    Vertex (vec3f (size.x, size.y, 0), vec3f (), vec2f (1, 1)),
+	    Vertex (vec3f (0, size.y, 0), vec3f (), vec2f (0, 1))
+	];
+	auto mesh = new Mesh (model, context, spec);
+	return mesh;
+    }
     
     ref Texture tex () {
 	return this._tex;

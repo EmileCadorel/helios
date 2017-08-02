@@ -51,13 +51,6 @@ class Texture {
 	this._texture.setMagFilter(GL_LINEAR);
 	this._texture.setWrapS(GL_REPEAT);
 	this._texture.setWrapT(GL_REPEAT);
-
-	import std.stdio;
-	writeln ("[");
-	foreach (it ; 0 .. image.width * image.height) {
-	    writef ("%d, ", *cast (ubyte*) (image.pixels + it));
-	}
-	writeln ("]");
 	this._texture.setImage (0, GL_RGBA, image.width, image.height, 0, GL_RGBA,  GL_UNSIGNED_BYTE, image.pixels);
 
 	this._texture.generateMipmap ();
