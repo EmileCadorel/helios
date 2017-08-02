@@ -7,6 +7,7 @@ struct Configuration {
     int  width;
     int height;
     string [string] activities;
+    string font;
     
     this (string file) {
 	auto j = parseJSON (readText (file));
@@ -17,6 +18,8 @@ struct Configuration {
 		this.parseSize (value);
 	    } else if (key == "activities") {
 		parseActivities (value);
+	    } else if (key == "font") {
+		this.font = value.str;
 	    }
 	}
     }

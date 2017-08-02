@@ -55,6 +55,10 @@ class Text {
     private string _fontName;
     private int _size;
     
+    this (int size) {
+	this._fontName = Application.currentContext.systemFont;
+	this._size = size;
+    }
     
     this (string fontName, int size) {
 	this._fontName = fontName;
@@ -72,6 +76,10 @@ class Text {
     
     ref vec2f position () {
 	return this._position;
+    }
+
+    vec2f size () {
+	return this._surfSize;
     }
 
     private void computeText () {

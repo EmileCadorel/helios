@@ -1,6 +1,7 @@
 module helios.gui.Widget;
 public import helios.system._;
 public import helios.model._;
+public import helios.draw._;
 import gfm.math, gfm.opengl, gfm.assimp;
 
 private auto vertColor = q{
@@ -46,11 +47,14 @@ class Widget {
     protected vec2f _position;
 
     protected vec2f _size;
+
+    private bool _clicked = false;
     
     this () {
 	alias context = Application.currentContext;
 	context.input.mouse (MouseInfo (SDL_BUTTON_LEFT, SDL_MOUSEBUTTONDOWN)).connect (&this.clickSlot);
 	context.input.mouse (MouseInfo (SDL_BUTTON_RIGHT, SDL_MOUSEBUTTONDOWN)).connect (&this.clickRightSlot);
+	context.input.mouse (MouseInfo (SDL_BUTTON_LEFT, SDL_MOUSEBUTTONUP)).connect (&this.clickStopSlot);
 	context.input.motion ().connect (&this.motionSlot);
     }
 
@@ -60,14 +64,26 @@ class Widget {
 		this.onClickRight (MouseEvent (x, y, info));
 	    }
 	}
-    }
-    
+    }   
+
     final void clickSlot (int x, int y, MouseInfo info) {
 	if (this._position.x <= x && this._position.x + this._size.x >= x) {
 	    if (this._position.y <= y && this._position.y + this._size.y >= y) {
+		this._clicked = true;
 		this.onClick (MouseEvent (x, y, info));
 	    }
 	}
+    }
+
+    final void clickStopSlot (int x, int y, MouseInfo info) {
+	if (this._clicked) {
+	    if (this._position.x <= x && this._position.x + this._size.x >= x) {
+		if (this._position.y <= y && this._position.y + this._size.y >= y) {
+		    this.onClickEnd (MouseEvent (x, y, info));
+		}
+	    }
+	}
+	this._clicked = false;
     }
 
     final void motionSlot (int x, int y, MouseInfo info) {
@@ -83,6 +99,8 @@ class Widget {
     }
     
     abstract void onClick (MouseEvent);
+
+    void onClickEnd (MouseEvent) {}
     
     abstract void onClickRight (MouseEvent);
 
@@ -116,6 +134,11 @@ class Widget {
 	
     }
 
+    protected static void drawTextCenter (vec2f pos, vec2f size, Text text) {
+	text.position.x = pos.x + (size.x / 2) - (text.size.x / 2);
+	text.position.y = pos.y + (size.y / 2) - (text.size.y / 2);
+	text.draw ();
+    }
     
     ref vec2f position () {
 	return this._position;

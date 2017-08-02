@@ -1,6 +1,6 @@
 module helios.system.Input;
 public import gfm.sdl2;
-import std.container;
+import std.container, std.algorithm;
 
 struct KeyInfo {
     SDL_Keycode code;
@@ -32,17 +32,31 @@ class Input {
 	alias SlotDel = void delegate (Type);
 	alias SlotFunc = void function (Type);
 	
-	SList! (SlotDel) _slotDels;
-	SList! (SlotFunc) _slotFuncs;
+	Array! (SlotDel) _slotDels;
+	Array! (SlotFunc) _slotFuncs;
 	
 	void connect (SlotDel slot) {
-	    this._slotDels.insertFront (slot);
+	    this._slotDels.insertBack (slot);
 	}
 
 	void connect (SlotFunc slot) {
-	    this._slotFuncs.insertFront (slot);
+	    this._slotFuncs.insertBack (slot);
 	}
 
+	void disconnect (SlotDel slot) {
+	    auto it = this._slotDels[].find!"a is b" (slot);
+	    if (!it.empty) {
+		this._slotDels.linearRemove (it [0 .. 1]);
+	    }
+	}
+
+	void disconnect (SlotFunc slot) {
+	    auto it = this._slotFuncs[].find!"a is b" (slot);
+	    if (!it.empty) {
+		this._slotFuncs.linearRemove (it [0 .. 1]);
+	    }
+	}
+	
 	void opCall (Type elem) {
 	    foreach (it ; this._slotFuncs)
 		it (elem);

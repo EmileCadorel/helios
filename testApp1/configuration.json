@@ -1,5 +1,6 @@
 {
     "name" : "Test App 1",
+    "font" : "fonts/Font.ttf",
     "size" : { "width" : 800, "height" : 600 },
     "activities" : {
 	"activities.MainActivity.MainActivity" : ["main"],

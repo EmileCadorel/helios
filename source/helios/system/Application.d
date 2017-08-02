@@ -112,6 +112,10 @@ class Application {
     Window window () {
 	return this._window;
     }
+
+    string systemFont () {
+	return this._config.font;
+    }
     
     ref Intent intent () {
 	return this._intent;
