@@ -58,7 +58,7 @@ class Widget {
 
     private static bool __init__ = false;
 
-    private static Widget __focused__;
+    private static Widget __focused__, __hovered__;
     
     this () {
 	__widgets__.insertBack (this);
@@ -119,10 +119,20 @@ class Widget {
     }
 
     static void motionSlot (int x, int y, MouseInfo info) {
+	if (__hovered__ !is null) {
+	    if (__hovered__.position.x > x || __hovered__.position.x + __hovered__._size.x < x ||
+		__hovered__._position.y > y || __hovered__._position.y + __hovered__._size.y < y) {
+	    
+		__hovered__.onHoverEnd (MouseEvent (x, y, info));
+		__hovered__ = null;
+	    }
+	}
+	
 	foreach (self ; __widgets__) {
 	    if (self._position.x <= x && self._position.x + self._size.x >= x) {
 		if (self._position.y <= y && self._position.y + self._size.y >= y) {
 		    self.onHover (MouseEvent (x, y, info));
+		    __hovered__ = self;
 		    break;
 		}
 	    }
@@ -140,13 +150,15 @@ class Widget {
 	this.onDraw ();
     }
     
-    abstract void onClick (MouseEvent);
+    void onClick (MouseEvent) {}
 
     void onClickEnd (MouseEvent) {}
     
-    abstract void onClickRight (MouseEvent);
+    void onClickRight (MouseEvent) {}
 
-    abstract void onHover (MouseEvent);
+    void onHover (MouseEvent) {}
+
+    void onHoverEnd (MouseEvent) {}
     
     abstract void onDraw ();
 

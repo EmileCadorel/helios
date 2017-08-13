@@ -28,8 +28,8 @@ class MainActivity : Activity {
     bool _zoom, _unzoom;
     Light _light;
     TPSGuide _guide;
-    FloatingBox _box, _box2;
-
+    Button _button;
+    
     Text _text;
     
     override void onCreate (Application context) {
@@ -54,9 +54,8 @@ class MainActivity : Activity {
 	this._lightDir = vec3f (-0.8, -2.0, -1.);
 	this._ambiant = vec3f (0.3, 0.3, 0.3);
 
-	this._box = new FloatingBox (vec2f (1, 1), vec2f(250, 120), "hehe");	
-	this._box2 = new FloatingBox (vec2f (100, 2), vec2f (250, 120), "test");
-	this._box2.release ();
+	this._button = new Button (vec2f(10, 10), vec2f (100, 60), "OK");
+	this._button.clicked.connect (&this.clicked);
 	
 	context.input.winResize.connect (&this.resize);
 	context.input.keyboard (KeyInfo (SDLK_ESCAPE, -1)).connect (&this.end);
@@ -90,6 +89,10 @@ class MainActivity : Activity {
     void unzoom (KeyInfo info) {
 	this._unzoom = info.type == SDL_KEYDOWN;
     }
+
+    void clicked () {
+	writeln ("Clicked");
+    }
     
     override void onUpdate () {
 	import std.conv;
@@ -110,9 +113,6 @@ class MainActivity : Activity {
 
     override void onResume () {
 	writeln ("Pause " ~ typeid (this).toString);
-    }
-
-    override void onDraw2D () {
     }
     
     override void onDraw () {	

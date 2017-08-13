@@ -35,11 +35,13 @@ private auto frag = q{
     in vec2 textureCoord;
 
     uniform sampler2D diffuse;
-
+    uniform vec4 in_color;
+    
     out vec4 out_color;
 
     void main() {
 	out_color = texture(diffuse, textureCoord);
+	out_color.xyz = in_color.xyz;
     }
 };
 
@@ -51,6 +53,7 @@ class Text {
     private Texture _texture;
     private vec2f _position;
     private vec2f _surfSize;
+    private vec4f _color = vec4f (1, 1, 1, 1);
     private string _text;
     private string _fontName;
     private int _size;
@@ -68,6 +71,10 @@ class Text {
     void text (string other) {
 	this._text = other;
 	computeText ();
+    }
+
+    void color (vec4f color) {
+	this._color = color;
     }
 
     string text () {
@@ -105,6 +112,7 @@ class Text {
 
 	__shader__.uniform ("screenPos").set (this._position);
 	__shader__.uniform ("size").set (this._surfSize);
+	__shader__.uniform ("in_color").set (this._color);
 	
 	this._texture.use (__shader__);
 	__shader__.use ();	

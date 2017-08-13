@@ -10,3 +10,4 @@ public import helios.system.Intent;
 public import helios.system.Shader;
 public import helios.system.Timer;
 public import helios.system.Window;
+public import helios.system.Signal;
