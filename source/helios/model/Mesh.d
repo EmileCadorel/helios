@@ -97,6 +97,16 @@ class Mesh {
 	auto mesh = new Mesh (model, context, spec);
 	return mesh;
     }
+
+    static Mesh createTriangle (T) (Application context, VertexSpecification!T spec, float size) {
+	auto model = [
+	    Vertex (vec3f (size / 2., 0, 0), vec3f (), vec2f (0.5, 0)),
+	    Vertex (vec3f (0, size, 0), vec3f (), vec2f (0, 1)),
+	    Vertex (vec3f (size, size, 0), vec3f (), vec2f (1, 1))		    
+	];
+	auto mesh = new Mesh (model, context, spec);
+	return mesh;
+    }
     
     ref Texture tex () {
 	return this._tex;

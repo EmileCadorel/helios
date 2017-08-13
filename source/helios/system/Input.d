@@ -46,14 +46,14 @@ class Input {
 	void disconnect (SlotDel slot) {
 	    auto it = this._slotDels[].find!"a is b" (slot);
 	    if (!it.empty) {
-		this._slotDels.linearRemove (it [0 .. 1]);
+		this._slotDels.linearRemove (it);
 	    }
 	}
 
 	void disconnect (SlotFunc slot) {
 	    auto it = this._slotFuncs[].find!"a is b" (slot);
 	    if (!it.empty) {
-		this._slotFuncs.linearRemove (it [0 .. 1]);
+		this._slotFuncs.linearRemove (it);
 	    }
 	}
 	

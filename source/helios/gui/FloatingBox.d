@@ -15,7 +15,6 @@ class FloatingBox : Widget {
 
     private vec2f _lastPos;
     private static immutable int ROD_SIZE = 20;
-
     
     this (vec2f pos, vec2f size, string name) {
 	this.position = pos;
@@ -29,8 +28,7 @@ class FloatingBox : Widget {
 	    this._lastClicked = Clock.currTime;
 	    this._needClose = true;
 	    this._lastPos = vec2f (event.x, event.y) - this._position;
-	    Application.currentContext.input.motion.connect (&this.move);
-	    
+	    Application.currentContext.input.motion.connect (&this.move);	    
 	}
     }
 
@@ -72,10 +70,14 @@ class FloatingBox : Widget {
     }
 
     override void onDraw () {
-	super.drawQuad (this._position, vec2f (this._size.x, ROD_SIZE), vec4f (93. / 255., 89. / 255, 166. / 255., 0.7));
+	super.drawQuad (this._position, vec2f (this._size.x, ROD_SIZE), vec4f (93. / 255., 89. / 255, 166. / 255., 1));
 	super.drawTextCenter (this._position, vec2f (this.size.x, ROD_SIZE), this._name);
-	if (!this._closed)
-	    super.drawQuad (this._position + vec2f (0, ROD_SIZE), vec2f (this._size.x, this._size.y - ROD_SIZE), vec4f (1, 1, 219. / 255., 0.7));	
+	if (!this._closed) {
+	    super.drawQuad (this._position + vec2f (0, ROD_SIZE), vec2f (this._size.x, this._size.y - ROD_SIZE), vec4f (1, 1, 219. / 255., 1));
+	    super.drawTriangle (this._position + vec2f (ROD_SIZE / 2., ROD_SIZE / 4.), ROD_SIZE / 2, vec4f (1, 1, 1, 1));
+	} else {
+	    super.drawTriangle (this._position + vec2f (ROD_SIZE / 2., ROD_SIZE / 4.), ROD_SIZE / 2, vec4f (1, 1, 1, 1), 180);
+	}
     }
 
 }

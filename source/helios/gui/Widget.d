@@ -3,6 +3,7 @@ public import helios.system._;
 public import helios.model._;
 public import helios.draw._;
 import gfm.math, gfm.opengl, gfm.assimp;
+import std.math, std.container;
 
 private auto vertColor = q{
 #version 450 core
@@ -12,15 +13,18 @@ private auto vertColor = q{
     uniform vec2 screenSize;
     uniform vec2 screenPos;
     uniform vec2 size;
-
+    uniform mat2 rotation;
+    
     void main() {
-	vec2 pos = vec2(0.0, 0.0);	
-	pos.x = ((position.x * size.x) + screenPos.x) - (screenSize.x / 2);
-	pos.y =  (screenSize.y / 2) - ((position.y * size.y) + screenPos.y);
+	vec2 pos = rotation * position.xy;
+	vec2 mSize = rotation * size.xy;
+	
+	pos.x = ((pos.x * mSize.x) + screenPos.x) - (screenSize.x / 2);
+	pos.y =  (screenSize.y / 2) - ((pos.y * mSize.y) + screenPos.y);
 
 	pos /= (screenSize / 2);
-
-	gl_Position = vec4(pos, 0.0, 1.0);
+	
+	gl_Position = vec4 (pos, 0.0, 1.0);
     }
 
 };
@@ -42,58 +46,96 @@ class Widget {
 
     private static Shader __color__;
 
-    private static Mesh __quad__;
+    private static Mesh __quad__, __triangle__;
     
     protected vec2f _position;
 
     protected vec2f _size;
 
     private bool _clicked = false;
+
+    private static Array!Widget __widgets__;
+
+    private static bool __init__ = false;
+
+    private static Widget __focused__;
     
     this () {
-	alias context = Application.currentContext;
-	context.input.mouse (MouseInfo (SDL_BUTTON_LEFT, SDL_MOUSEBUTTONDOWN)).connect (&this.clickSlot);
-	context.input.mouse (MouseInfo (SDL_BUTTON_RIGHT, SDL_MOUSEBUTTONDOWN)).connect (&this.clickRightSlot);
-	context.input.mouse (MouseInfo (SDL_BUTTON_LEFT, SDL_MOUSEBUTTONUP)).connect (&this.clickStopSlot);
-	context.input.motion ().connect (&this.motionSlot);
+	__widgets__.insertBack (this);
+	if (!__init__) {
+	    alias context = Application.currentContext;
+	    context.input.mouse (MouseInfo (SDL_BUTTON_LEFT, SDL_MOUSEBUTTONDOWN)).connect (&clickSlot);
+	    context.input.mouse (MouseInfo (SDL_BUTTON_RIGHT, SDL_MOUSEBUTTONDOWN)).connect (&clickRightSlot);
+	    context.input.mouse (MouseInfo (SDL_BUTTON_LEFT, SDL_MOUSEBUTTONUP)).connect (&clickStopSlot);
+	    context.input.motion ().connect (&motionSlot);
+	}
     }
 
-    final void clickRightSlot (int x, int y, MouseInfo info) {
-	if (this._position.x <= x && this._position.x + this._size.x >= x) {
-	    if (this._position.y <= y && this._position.y + this._size.y >= y) {
-		this.onClickRight (MouseEvent (x, y, info));
+    static void clickRightSlot (int x, int y, MouseInfo info) {
+	foreach (self ; __widgets__) {
+	    if (self._position.x <= x && self._position.x + self._size.x >= x) {
+		if (self._position.y <= y && self._position.y + self._size.y >= y) {
+		    self.onClickRight (MouseEvent (x, y, info));
+		    break;
+		}
 	    }
 	}
     }   
 
-    final void clickSlot (int x, int y, MouseInfo info) {
-	if (this._position.x <= x && this._position.x + this._size.x >= x) {
-	    if (this._position.y <= y && this._position.y + this._size.y >= y) {
-		this._clicked = true;
-		this.onClick (MouseEvent (x, y, info));
-	    }
-	}
-    }
-
-    final void clickStopSlot (int x, int y, MouseInfo info) {
-	if (this._clicked) {
-	    if (this._position.x <= x && this._position.x + this._size.x >= x) {
-		if (this._position.y <= y && this._position.y + this._size.y >= y) {
-		    this.onClickEnd (MouseEvent (x, y, info));
+    static void clickSlot (int x, int y, MouseInfo info) {
+	if (__focused__ !is null) {
+	    if (__focused__._position.x <= x && __focused__._position.x + __focused__._size.x >= x) {
+		if (__focused__._position.y <= y && __focused__._position.y + __focused__._size.y >= y) {
+		    __focused__._clicked = true;
+		    __focused__.onClick (MouseEvent (x, y, info));
+		    return;
 		}
 	    }
 	}
-	this._clicked = false;
-    }
-
-    final void motionSlot (int x, int y, MouseInfo info) {
-	if (this._position.x <= x && this._position.x + this._size.x >= x) {
-	    if (this._position.y <= y && this._position.y + this._size.y >= y) {
-		this.onHover (MouseEvent (x, y, info));
+	
+	foreach (self ; __widgets__) {
+	    if (self._position.x <= x && self._position.x + self._size.x >= x) {
+		if (self._position.y <= y && self._position.y + self._size.y >= y) {
+		    self._clicked = true;
+		    __focused__ = self;
+		    self.onClick (MouseEvent (x, y, info));
+		    break;
+		}	    
 	    }
 	}
     }
 
+    static void clickStopSlot (int x, int y, MouseInfo info) {
+	if (__focused__ !is null) {
+	    if (__focused__._clicked) {
+		if (__focused__._position.x <= x && __focused__._position.x + __focused__._size.x >= x) {
+		    if (__focused__._position.y <= y && __focused__._position.y + __focused__._size.y >= y) {
+			__focused__.onClickEnd (MouseEvent (x, y, info));
+		    }
+		}
+	    }
+	    __focused__._clicked = false;
+	}
+    }
+
+    static void motionSlot (int x, int y, MouseInfo info) {
+	foreach (self ; __widgets__) {
+	    if (self._position.x <= x && self._position.x + self._size.x >= x) {
+		if (self._position.y <= y && self._position.y + self._size.y >= y) {
+		    self.onHover (MouseEvent (x, y, info));
+		    break;
+		}
+	    }
+	}
+    }
+
+    static void drawGUI () {
+	foreach (self ; __widgets__) {
+	    if (self !is __focused__) self.onDraw ();	   
+	}
+	if (__focused__)  __focused__.onDraw ();
+    }
+    
     final void draw () {
 	this.onDraw ();
     }
@@ -108,13 +150,33 @@ class Widget {
     
     abstract void onDraw ();
 
-    protected static void drawQuad (vec2f pos, vec2f size, vec4f color) {
-	if (__color__ is null) {
-	    __color__ = new Shader (Application.currentContext.openglContext,
-				    vertColor,
-				    fragColor,
-				    true);				    
+    final void release () {
+	import std.algorithm;
+	auto it = __widgets__[].find!("a is b") (this);
+	if (!it.empty) {
+	    __widgets__.linearRemove (it);
 	}
+    }
+    
+    private static void initColor () {
+	__color__ = new Shader (Application.currentContext.openglContext,
+				vertColor,
+				fragColor,
+				true);				    
+    }
+
+    private static Matrix!(float, 2, 2) rotation (float angle) {
+	Matrix!(float, 2, 2) mat;
+	mat.rows [0][0] = cos (angle);
+	mat.rows [0][1] = -sin (angle);
+
+	mat.rows [1][0] = sin (angle);
+	mat.rows [1][1] = cos (angle);
+	return mat;
+    }
+    
+    protected static void drawQuad (vec2f pos, vec2f size, vec4f color, float angle = 0.0f) {
+	if (__color__ is null) initColor ();
 	
 	if (__quad__ is null) {
 	    __quad__ = Mesh.createQuad (Application.currentContext,
@@ -122,17 +184,45 @@ class Widget {
 					vec2f (1, 1));
 	    
 	}
-
+	
+	auto mat = rotation (angle * PI / 180.0);
+	
 	__color__.uniform ("screenSize").set (vec2f (Application.currentContext.window.width,
 					       Application.currentContext.window.height));
 	__color__.uniform ("screenPos").set (pos);
 	__color__.uniform ("size").set (size);
 	__color__.uniform ("color").set (color);
+	__color__.uniform ("rotation").set (mat);
+	
 	__color__.use ();
 	__quad__.draw ();
 	__color__.unuse ();
 	
     }
+
+    protected static void drawTriangle (vec2f pos, float size, vec4f color, float angle = 0.0f) {
+	if (__color__ is null) initColor ();
+	if (!__triangle__) {
+	    __triangle__ = Mesh.createTriangle (Application.currentContext,
+						new VertexSpecification!Vertex (__color__.program),
+						1.0f
+	    );
+	}
+	auto mat = rotation (angle * PI / 180.0);
+	
+	__color__.uniform ("screenSize").set (vec2f (Application.currentContext.window.width, 
+						     Application.currentContext.window.height));
+	__color__.uniform ("screenPos").set (pos);
+	__color__.uniform ("size").set (vec2f (size, size));
+	__color__.uniform ("color").set (color);
+	__color__.uniform ("rotation").set (mat);
+	
+	__color__.use ();
+	__triangle__.draw ();
+	__color__.unuse ();
+	
+    }
+    
 
     protected static void drawTextCenter (vec2f pos, vec2f size, Text text) {
 	text.position.x = pos.x + (size.x / 2) - (text.size.x / 2);

@@ -1,5 +1,6 @@
 module helios.system.Application;
 import helios.system._, helios.units._;
+import helios.gui._;
 import gfm.opengl, std.conv : to;
 import gfm.sdl2, std.container;
 
@@ -56,6 +57,7 @@ class Application {
 	    this._current.back.onDraw ();
 	    
 	    this._window.set2DRendering ();
+	    Widget.drawGUI ();
 	    this._current.back.onDraw2D ();
 	    
 	    this._window.swap ();
