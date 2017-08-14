@@ -5,7 +5,7 @@ import gfm.opengl, gfm.math, std.math;
 class Guide {
 
     private Camera _camera;
-    private Application _context;
+    protected Application _context;
 	
     this (Application context) {
 	this._context = context;
@@ -14,6 +14,10 @@ class Guide {
     protected void inform (Camera who) {
 	this._camera = who;
     }
+
+    abstract void enableInputs ();
+    
+    abstract void disableInputs ();
         
 }
 
@@ -59,7 +63,7 @@ class Camera {
 	this._guide.inform (this);
     }
     
-    const (Guide) guide () {
+    Guide guide () {
 	return this._guide;
     }
 
@@ -137,13 +141,30 @@ class TPSGuide : Guide {
     private double _precise = 0.2;
     private double _radius = 4.;
     private bool _started;
+    private bool _enable;
     
     this (Application context) {
 	super (context);
-	context.input.mouse (MouseInfo (SDL_BUTTON_LEFT, -1)).connect (&this._start);
-	context.input.motion.connect (&this._update);	
+	this._enable = false;
     }
 
+
+    override final void enableInputs () {
+	if (!this._enable) {
+	    this._context.input.mouse (MouseInfo (SDL_BUTTON_LEFT, -1)).connect (&this._start);
+	    this._context.input.motion.connect (&this._update);
+	    this._enable = true;
+	}
+    }
+
+    override final void disableInputs () {
+	if (this._enable) {
+	    this._context.input.mouse (MouseInfo (SDL_BUTTON_LEFT, -1)).disconnect (&this._start);
+	    this._context.input.motion.disconnect (&this._update);
+	    this._enable = false;
+	}
+    }
+    
     private void _start (int, int, MouseInfo info) {
 	this._started = info.type == SDL_MOUSEBUTTONDOWN;
 	if (SDL_MOUSEBUTTONUP) {

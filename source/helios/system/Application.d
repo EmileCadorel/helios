@@ -41,6 +41,7 @@ class Application {
 	
 	while (this._isRunning) {
 	    this._input.poll ();
+	    this._window.resetViewPort ();
 	    this._window.clear ();
 
 	    if (this._current.back.isClose ()) {
@@ -54,8 +55,10 @@ class Application {
 	    this._current.back.onUpdate ();
 
 	    this._window.set3DRendering ();
+	    Widget.draw3D ();
 	    this._current.back.onDraw ();
-	    
+
+	    this._window.resetViewPort ();
 	    this._window.set2DRendering ();
 	    Widget.drawGUI ();
 	    this._current.back.onDraw2D ();

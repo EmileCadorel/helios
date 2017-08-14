@@ -110,9 +110,18 @@ class Window {
     }
     
     void clear () {
+	glClearColor (1, 1, 1, 1);
 	glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     }
-    
+
+    void clearScissor (vec4f color, vec2f pos, vec2f size) {
+	glClearColor (color.x, color.y, color.z, color.w);
+	glEnable (GL_SCISSOR_TEST);
+	glScissor (cast (int) pos.x, cast (int) pos.y, cast (int) size.x, cast (int) size.y);
+	glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glDisable (GL_SCISSOR_TEST);
+    }    
+
     void swap () {
 	this._window.swapBuffers ();
     }
@@ -130,6 +139,16 @@ class Window {
 	glDisable (GL_POLYGON_SMOOTH);
     }
 
+    void setViewPort (vec2f position, vec2f size) {
+	glViewport (cast (int) position.x, cast (int) position.y, cast (int) size.x, cast (int)size.y);
+    }
+    
+    void resetViewPort () {
+	glViewport (0, 0, width, height);
+    }
+
+    
+    
     ~this () {
 	this._gl.destroy ();
 	this._sdl2.destroy ();

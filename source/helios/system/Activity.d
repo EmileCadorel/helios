@@ -5,19 +5,19 @@ abstract class Activity {
 
     private bool _close = false;
     
-    void onCreate (Application context);
+    abstract void onCreate (Application context);
 
     void onPause () {}
 
     void onResume () {}
     
-    void onUpdate ();
+    void onUpdate () {}
 
     void onDraw2D () {}
     
-    void onDraw ();
+    void onDraw () {}
     
-    void onClose ();
+    void onClose () {}
 
     final void close () {
 	this._close = true;

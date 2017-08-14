@@ -56,12 +56,18 @@ class Widget {
 
     private static Array!Widget __widgets__;
 
+    private static Array!Widget __widgets3D__;
+
     private static bool __init__ = false;
 
     private static Widget __focused__, __hovered__;
     
     this () {
-	__widgets__.insertBack (this);
+	if (this.is3D)
+	    __widgets3D__.insertBack (this);
+	else
+	    __widgets__.insertBack (this);
+	
 	if (!__init__) {
 	    alias context = Application.currentContext;
 	    context.input.mouse (MouseInfo (SDL_BUTTON_LEFT, SDL_MOUSEBUTTONDOWN)).connect (&clickSlot);
@@ -73,6 +79,15 @@ class Widget {
 
     static void clickRightSlot (int x, int y, MouseInfo info) {
 	foreach (self ; __widgets__) {
+	    if (self._position.x <= x && self._position.x + self._size.x >= x) {
+		if (self._position.y <= y && self._position.y + self._size.y >= y) {
+		    self.onClickRight (MouseEvent (x, y, info));
+		    break;
+		}
+	    }
+	}
+
+	foreach (self ; __widgets3D__) {
 	    if (self._position.x <= x && self._position.x + self._size.x >= x) {
 		if (self._position.y <= y && self._position.y + self._size.y >= y) {
 		    self.onClickRight (MouseEvent (x, y, info));
@@ -97,7 +112,22 @@ class Widget {
 	    if (self._position.x <= x && self._position.x + self._size.x >= x) {
 		if (self._position.y <= y && self._position.y + self._size.y >= y) {
 		    self._clicked = true;
+		    if (__focused__) __focused__.onFocusLose ();
 		    __focused__ = self;
+		    __focused__.onFocusGain ();
+		    self.onClick (MouseEvent (x, y, info));
+		    break;
+		}	    
+	    }
+	}
+
+	foreach (self ; __widgets3D__) {
+	    if (self._position.x <= x && self._position.x + self._size.x >= x) {
+		if (self._position.y <= y && self._position.y + self._size.y >= y) {
+		    self._clicked = true;
+		    if (__focused__) __focused__.onFocusLose ();
+		    __focused__ = self;
+		    __focused__.onFocusGain ();
 		    self.onClick (MouseEvent (x, y, info));
 		    break;
 		}	    
@@ -108,11 +138,7 @@ class Widget {
     static void clickStopSlot (int x, int y, MouseInfo info) {
 	if (__focused__ !is null) {
 	    if (__focused__._clicked) {
-		if (__focused__._position.x <= x && __focused__._position.x + __focused__._size.x >= x) {
-		    if (__focused__._position.y <= y && __focused__._position.y + __focused__._size.y >= y) {
-			__focused__.onClickEnd (MouseEvent (x, y, info));
-		    }
-		}
+		__focused__.onClickEnd (MouseEvent (x, y, info));		    		
 	    }
 	    __focused__._clicked = false;
 	}
@@ -137,13 +163,30 @@ class Widget {
 		}
 	    }
 	}
+
+	foreach (self ; __widgets3D__) {
+	    if (self._position.x <= x && self._position.x + self._size.x >= x) {
+		if (self._position.y <= y && self._position.y + self._size.y >= y) {
+		    self.onHover (MouseEvent (x, y, info));
+		    __hovered__ = self;
+		    break;
+		}
+	    }
+	}
+	
     }
 
     static void drawGUI () {
-	foreach (self ; __widgets__) {
+	foreach (self ; __widgets__) {	    
 	    if (self !is __focused__) self.onDraw ();	   
 	}
-	if (__focused__)  __focused__.onDraw ();
+	if (__focused__ && !__focused__.is3D)  __focused__.onDraw ();
+    }
+
+    static void draw3D () {
+	foreach (self ; __widgets3D__)
+	    if (self !is __focused__) self.onDraw ();
+	if (__focused__ && __focused__.is3D) __focused__.onDraw ();
     }
     
     final void draw () {
@@ -159,6 +202,12 @@ class Widget {
     void onHover (MouseEvent) {}
 
     void onHoverEnd (MouseEvent) {}
+
+    void onFocusGain () {}
+    
+    void onFocusLose () {}
+
+    bool is3D () { return false; }
     
     abstract void onDraw ();
 
