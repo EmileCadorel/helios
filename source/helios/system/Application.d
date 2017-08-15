@@ -121,6 +121,10 @@ class Application {
     string systemFont () {
 	return this._config.font;
     }
+
+    Layout mainLayout () {
+	return Widget.mainLayout;
+    }
     
     ref Intent intent () {
 	return this._intent;

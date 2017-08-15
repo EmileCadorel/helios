@@ -35,8 +35,8 @@ class FloatingBox : Widget {
     override void onClickEnd (MouseEvent event) {
 	if (Clock.currTime - this._lastClicked <= 1.seconds && this._needClose) {
 	    this._closed = !this._closed;	    
-	    if (!this._closed && this._position.y + this._size.y > Application.currentContext.window.height) {
-		this._position.y = Application.currentContext.window.height - this._size.y;
+	    if (!this._closed && this._position.y + this._size.y > this.parent.size.y) {
+		this._position.y = this.parent.size.y - this._size.y;
 	    }
 	}
 	Application.currentContext.input.motion.disconnect (&this.move);
@@ -45,17 +45,17 @@ class FloatingBox : Widget {
     final void move (int x, int y, MouseInfo info) {
 	this._needClose = false;
 	this._position = vec2f (x, y) - this._lastPos;
-	if (this._position.x < 0) this._position.x = 0;
-	else if (this._position.x + this._size.x > Application.currentContext.window.width) {
-	    this._position.x = Application.currentContext.window.width - this._size.x;
+	if (this.innerPosition.x < 0) this.innerPosition.x = 0;
+	else if (this.innerPosition.x + this._size.x > this.parent.size.x) {
+	    this.innerPosition.x = this.parent.size.x - this._size.x;
 	}
 
-	if (this._position.y < 0) this._position.y = 0;	
-	else if (this._position.y + this._size.y > Application.currentContext.window.height) {
+	if (this.innerPosition.y < 0) this.innerPosition.y = 0;
+	else if (this.innerPosition.y + this._size.y > this.parent.size.y) {
 	    if (!this._closed) {
-		this._position.y = Application.currentContext.window.height - this._size.y;
-	    } else if (this._position.y + ROD_SIZE > Application.currentContext.window.height) {
-		this._position.y = Application.currentContext.window.height - ROD_SIZE;
+		this.innerPosition.y = this.parent.size.y - this._size.y;
+	    } else if (this.innerPosition.y + ROD_SIZE > this.parent.size.y) {
+		this.innerPosition.y = this.parent.size.y - ROD_SIZE;
 	    }
 	}	
        
@@ -70,13 +70,13 @@ class FloatingBox : Widget {
     }
 
     override void onDraw () {
-	super.drawQuad (this._position, vec2f (this._size.x, ROD_SIZE), vec4f (93. / 255., 89. / 255, 166. / 255., 1));
-	super.drawTextCenter (this._position, vec2f (this.size.x, ROD_SIZE), this._name);
+	super.drawQuad (this.position, vec2f (this.size.x, ROD_SIZE), vec4f (93. / 255., 89. / 255, 166. / 255., 1));
+	super.drawTextCenter (this.position, vec2f (this.size.x, ROD_SIZE), this._name);
 	if (!this._closed) {
-	    super.drawQuad (this._position + vec2f (0, ROD_SIZE), vec2f (this._size.x, this._size.y - ROD_SIZE), vec4f (1, 1, 219. / 255., 1));
-	    super.drawTriangle (this._position + vec2f (ROD_SIZE / 2., ROD_SIZE / 4.), ROD_SIZE / 2, vec4f (1, 1, 1, 1));
+	    super.drawQuad (this.position + vec2f (0, ROD_SIZE), vec2f (this.size.x, this.size.y - ROD_SIZE), vec4f (1, 1, 219. / 255., 1));
+	    super.drawTriangle (this.position + vec2f (ROD_SIZE / 2., ROD_SIZE / 4.), ROD_SIZE / 2, vec4f (1, 1, 1, 1));
 	} else {
-	    super.drawTriangle (this._position + vec2f (ROD_SIZE / 2., ROD_SIZE / 4.), ROD_SIZE / 2, vec4f (1, 1, 1, 1), 180);
+	    super.drawTriangle (this.position + vec2f (ROD_SIZE / 2., ROD_SIZE / 4.), ROD_SIZE / 2, vec4f (1, 1, 1, 1), 180);
 	}
     }
 

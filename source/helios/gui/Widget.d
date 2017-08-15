@@ -2,6 +2,7 @@ module helios.gui.Widget;
 public import helios.system._;
 public import helios.model._;
 public import helios.draw._;
+public import helios.gui._;
 import gfm.math, gfm.opengl, gfm.assimp;
 import std.math, std.container;
 
@@ -60,8 +61,12 @@ class Widget {
 
     private static bool __init__ = false;
 
-    private static Widget __focused__, __hovered__;
-    
+    protected static Widget __focused__, __hovered__;
+
+    private Widget _parent;
+
+    private static Layout __GUI__;
+
     this () {
 	if (this.is3D)
 	    __widgets3D__.insertBack (this);
@@ -69,6 +74,8 @@ class Widget {
 	    __widgets__.insertBack (this);
 	
 	if (!__init__) {
+	    __init__ = true;
+	    __GUI__ = new Layout ();
 	    alias context = Application.currentContext;
 	    context.input.mouse (MouseInfo (SDL_BUTTON_LEFT, SDL_MOUSEBUTTONDOWN)).connect (&clickSlot);
 	    context.input.mouse (MouseInfo (SDL_BUTTON_RIGHT, SDL_MOUSEBUTTONDOWN)).connect (&clickRightSlot);
@@ -78,63 +85,23 @@ class Widget {
     }
 
     static void clickRightSlot (int x, int y, MouseInfo info) {
-	foreach (self ; __widgets__) {
-	    if (self._position.x <= x && self._position.x + self._size.x >= x) {
-		if (self._position.y <= y && self._position.y + self._size.y >= y) {
-		    self.onClickRight (MouseEvent (x, y, info));
-		    break;
-		}
-	    }
-	}
-
-	foreach (self ; __widgets3D__) {
-	    if (self._position.x <= x && self._position.x + self._size.x >= x) {
-		if (self._position.y <= y && self._position.y + self._size.y >= y) {
-		    self.onClickRight (MouseEvent (x, y, info));
-		    break;
-		}
-	    }
-	}
+	__GUI__.clickRightSlot (x, y, info);
     }   
 
     static void clickSlot (int x, int y, MouseInfo info) {
 	if (__focused__ !is null) {
-	    if (__focused__._position.x <= x && __focused__._position.x + __focused__._size.x >= x) {
-		if (__focused__._position.y <= y && __focused__._position.y + __focused__._size.y >= y) {
+	    if (__focused__.position.x <= x && __focused__.position.x + __focused__._size.x >= x) {
+		if (__focused__.position.y <= y && __focused__.position.y + __focused__._size.y >= y) {
 		    __focused__._clicked = true;
 		    __focused__.onClick (MouseEvent (x, y, info));
 		    return;
 		}
 	    }
 	}
-	
-	foreach (self ; __widgets__) {
-	    if (self._position.x <= x && self._position.x + self._size.x >= x) {
-		if (self._position.y <= y && self._position.y + self._size.y >= y) {
-		    self._clicked = true;
-		    if (__focused__) __focused__.onFocusLose ();
-		    __focused__ = self;
-		    __focused__.onFocusGain ();
-		    self.onClick (MouseEvent (x, y, info));
-		    break;
-		}	    
-	    }
-	}
 
-	foreach (self ; __widgets3D__) {
-	    if (self._position.x <= x && self._position.x + self._size.x >= x) {
-		if (self._position.y <= y && self._position.y + self._size.y >= y) {
-		    self._clicked = true;
-		    if (__focused__) __focused__.onFocusLose ();
-		    __focused__ = self;
-		    __focused__.onFocusGain ();
-		    self.onClick (MouseEvent (x, y, info));
-		    break;
-		}	    
-	    }
-	}
+	__GUI__.clickSlot (x, y, info);	
     }
-
+    
     static void clickStopSlot (int x, int y, MouseInfo info) {
 	if (__focused__ !is null) {
 	    if (__focused__._clicked) {
@@ -154,43 +121,48 @@ class Widget {
 	    }
 	}
 	
-	foreach (self ; __widgets__) {
-	    if (self._position.x <= x && self._position.x + self._size.x >= x) {
-		if (self._position.y <= y && self._position.y + self._size.y >= y) {
-		    self.onHover (MouseEvent (x, y, info));
-		    __hovered__ = self;
-		    break;
-		}
-	    }
-	}
-
-	foreach (self ; __widgets3D__) {
-	    if (self._position.x <= x && self._position.x + self._size.x >= x) {
-		if (self._position.y <= y && self._position.y + self._size.y >= y) {
-		    self.onHover (MouseEvent (x, y, info));
-		    __hovered__ = self;
-		    break;
-		}
-	    }
-	}
-	
+	__GUI__.motionSlot (x, y, info);	
     }
 
     static void drawGUI () {
-	foreach (self ; __widgets__) {	    
-	    if (self !is __focused__) self.onDraw ();	   
-	}
+	__GUI__.onDraw ();
 	if (__focused__ && !__focused__.is3D)  __focused__.onDraw ();
     }
 
     static void draw3D () {
-	foreach (self ; __widgets3D__)
-	    if (self !is __focused__) self.onDraw ();
+	__GUI__.onDraw3D ();
 	if (__focused__ && __focused__.is3D) __focused__.onDraw ();
+    }
+
+    static Layout mainLayout () {
+	return __GUI__;
+    }
+    
+    final void setFocus (Widget widget) {
+	if (__focused__) __focused__.onFocusLose ();
+	__focused__ = widget;
+	if (__focused__) __focused__.onFocusGain ();
+    }
+
+    final void setHover (Widget widget, MouseEvent event) {
+	__hovered__ = widget;
+	if (__hovered__) __hovered__.onHover (event);
+    }
+
+    final bool isFocused (Widget widget) {
+	return __focused__ is widget;
     }
     
     final void draw () {
 	this.onDraw ();
+    }
+
+    final bool isClicked () {
+	return this._clicked;
+    }
+
+    final void isClicked (bool value) {
+	this._clicked = value;
     }
     
     void onClick (MouseEvent) {}
@@ -208,6 +180,14 @@ class Widget {
     void onFocusLose () {}
 
     bool is3D () { return false; }
+
+    final void parent (Widget parent) {
+	this._parent = parent;
+    }
+
+    final Widget parent () {
+	return this._parent;
+    }
     
     abstract void onDraw ();
 
@@ -290,13 +270,30 @@ class Widget {
 	text.position.y = pos.y + (size.y / 2) - (text.size.y / 2);
 	text.draw ();
     }
+
+    void position (vec2f position) {
+	this._position = position;
+    }
     
-    ref vec2f position () {
-	return this._position;
+    vec2f position () {
+	if (this._parent !is null) {
+	    auto pos = this._position + this._parent.position;
+	    return pos;
+	} else {
+	    return this._position;
+	}
     }
 
-    ref vec2f size () {
+    ref vec2f innerPosition () {
+	return this._position;
+    }
+    
+    vec2f size () {
 	return this._size;
+    }
+
+    void size (vec2f size) {
+	this._size = size;
     }
     
 }

@@ -33,10 +33,8 @@ class D3View : Widget {
     }
 
     override void onFocusLose () {
-	if (this._camera) {
-	    std.stdio.writeln ("Ici");
-	    this._camera.guide.disableInputs ();
-	}
+	if (this._camera) 
+	    this._camera.guide.disableInputs ();	
     }
 
     override bool is3D () {

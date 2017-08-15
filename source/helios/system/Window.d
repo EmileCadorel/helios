@@ -117,7 +117,8 @@ class Window {
     void clearScissor (vec4f color, vec2f pos, vec2f size) {
 	glClearColor (color.x, color.y, color.z, color.w);
 	glEnable (GL_SCISSOR_TEST);
-	glScissor (cast (int) pos.x, cast (int) pos.y, cast (int) size.x, cast (int) size.y);
+	auto posY = this._height - (pos.y + size.y);
+	glScissor (cast (int) pos.x, cast (int) posY, cast (int) size.x, cast (int) size.y);
 	glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glDisable (GL_SCISSOR_TEST);
     }    
@@ -140,7 +141,8 @@ class Window {
     }
 
     void setViewPort (vec2f position, vec2f size) {
-	glViewport (cast (int) position.x, cast (int) position.y, cast (int) size.x, cast (int)size.y);
+	auto posY = this._height - (position.y + size.y);
+	glViewport (cast (int) position.x, cast (int) posY, cast (int) size.x, cast (int)size.y);
     }
     
     void resetViewPort () {
