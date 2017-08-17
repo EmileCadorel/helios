@@ -5,3 +5,4 @@ public import helios.gui.Widget;
 public import helios.gui.FloatingBox;
 public import helios.gui.Button;
 public import helios.gui.D3View;
+public import helios.gui.LinearLayout;

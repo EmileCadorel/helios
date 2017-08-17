@@ -52,13 +52,13 @@ class Button : Widget {
     
     override void onDraw () {
 	if (this._isClicked) {
-	    super.drawQuad (this._position, this._size, vec4f (72. / 255., 136. / 255., 239. / 255., 1));
+	    super.drawQuad (this.position, this._size, vec4f (72. / 255., 136. / 255., 239. / 255., 1));
 	} else if (this._isHover) {
-	    super.drawQuad (this._position, this._size, vec4f (174. / 255., 167. / 255., 159. / 255., 1));
+	    super.drawQuad (this.position, this._size, vec4f (174. / 255., 167. / 255., 159. / 255., 1));
 	} else {
-	    super.drawQuad (this._position, this._size, vec4f (210. / 255., 218. / 255., 174. / 255., 1));
+	    super.drawQuad (this.position, this._size, vec4f (0.3, 0.3, 0.3, 1));
 	}
-	super.drawTextCenter (this._position, this._size, this._name);
+	super.drawTextCenter (this.position, this._size, this._name);
     }
     
 

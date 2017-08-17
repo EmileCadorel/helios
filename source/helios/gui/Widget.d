@@ -3,6 +3,7 @@ public import helios.system._;
 public import helios.model._;
 public import helios.draw._;
 public import helios.gui._;
+public import helios.gui.MainLayout;
 import gfm.math, gfm.opengl, gfm.assimp;
 import std.math, std.container;
 
@@ -65,7 +66,7 @@ class Widget {
 
     private Widget _parent;
 
-    private static Layout __GUI__;
+    private static MainLayout __GUI__;
 
     this () {
 	if (this.is3D)
@@ -75,7 +76,7 @@ class Widget {
 	
 	if (!__init__) {
 	    __init__ = true;
-	    __GUI__ = new Layout ();
+	    __GUI__ = new MainLayout ();
 	    alias context = Application.currentContext;
 	    context.input.mouse (MouseInfo (SDL_BUTTON_LEFT, SDL_MOUSEBUTTONDOWN)).connect (&clickSlot);
 	    context.input.mouse (MouseInfo (SDL_BUTTON_RIGHT, SDL_MOUSEBUTTONDOWN)).connect (&clickRightSlot);

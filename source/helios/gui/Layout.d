@@ -5,12 +5,12 @@ import std.container, gfm.math;
 
 class Layout : Widget {
 
-    private Array!Widget _widgets;
+    protected Array!Widget _widgets;
 
-    private Array!Widget _widgets3D;
+    protected Array!Widget _widgets3D;
 
     this () {
-	this._position = vec2f (30, 30);
+	this._position = vec2f (0, 0);
     }
 
     void addWidget (Widget widget) {
@@ -94,12 +94,23 @@ class Layout : Widget {
 	    }
 	}
     }
+
+    override final void onClickRight (MouseEvent event) {
+	this.clickRightSlot (event.x, event.y, event.info);
+    }
+
+    override final void onClick (MouseEvent event) {
+	this.clickSlot (event.x, event.y, event.info);
+    }
+
+    override final void onHover (MouseEvent event) {
+	this.motionSlot (event.x, event.y, event.info);
+    }
     
     override void onDraw () {
 	foreach (it ; this._widgets) {
 	    if (!super.isFocused (it)) it.draw ();
 	}
-	super.drawQuad (this._position, this.size, vec4f (0.2, 0.2, 0.2, 0.2));
     }
 
     void onDraw3D () {	
@@ -111,11 +122,6 @@ class Layout : Widget {
     void clear () {
 	this._widgets3D = make!(Array!Widget);
 	this._widgets = make!(Array!Widget);
-    }
-
-    override vec2f size () {
-	return vec2f (Application.currentContext.window.width - 60,
-		      Application.currentContext.window.height - 60);
     }
     
 }
