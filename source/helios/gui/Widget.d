@@ -146,6 +146,7 @@ class Widget {
     }
 
     final void setHover (Widget widget, MouseEvent event) {
+	if (__hovered__) __hovered__.onHoverEnd (event);
 	__hovered__ = widget;
 	if (__hovered__) __hovered__.onHover (event);
     }

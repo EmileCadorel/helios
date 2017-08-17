@@ -89,10 +89,15 @@ class Text {
 	return this._surfSize;
     }
 
-    private void computeText () {
+    private void computeText () {	
 	auto font = new SDLFont (Application.currentContext.sdlTtf, this._fontName, this._size);
-	auto surface = font.renderTextSolid (this._text, SDL_Color (255, 255, 255));
-	surface = surface.convert (SDL_AllocFormat (SDL_PIXELFORMAT_RGBA8888));
+	if (this._text != "") {
+	    auto surface = font.renderTextSolid (this._text, SDL_Color (255, 255, 255));
+	    surface = surface.convert (SDL_AllocFormat (SDL_PIXELFORMAT_RGBA8888));
+	    this._surfSize = vec2f (surface.width, surface.height);
+	    this._texture = new Texture ("diffuse", surface, Application.currentContext);	    
+	} else this._texture = null;
+	
 	if (__shader__ is null) {
 	    __shader__ = new Shader (Application.currentContext.openglContext,
 				     vert, frag, true);
@@ -100,24 +105,24 @@ class Text {
 					new VertexSpecification!Vertex (__shader__.program),
 					vec2f (1, 1));
 	}
-	
-	this._surfSize = vec2f (surface.width, surface.height);
-	this._texture = new Texture ("diffuse", surface, Application.currentContext);
+       
     }
     
     
     void draw () {
-	__shader__.uniform ("screenSize").set (vec2f (Application.currentContext.window.width,
-						      Application.currentContext.window.height));
-
-	__shader__.uniform ("screenPos").set (this._position);
-	__shader__.uniform ("size").set (this._surfSize);
-	__shader__.uniform ("in_color").set (this._color);
-	
-	this._texture.use (__shader__);
-	__shader__.use ();	
-	__mesh__.draw ();
-	__shader__.unuse ();	
+	if (this._texture !is null) {
+	    __shader__.uniform ("screenSize").set (vec2f (Application.currentContext.window.width,
+							  Application.currentContext.window.height));
+	    
+	    __shader__.uniform ("screenPos").set (this._position);
+	    __shader__.uniform ("size").set (this._surfSize);
+	    __shader__.uniform ("in_color").set (this._color);
+	    
+	    this._texture.use (__shader__);
+	    __shader__.use ();	
+	    __mesh__.draw ();
+	    __shader__.unuse ();
+	}
     }    
     
 }
