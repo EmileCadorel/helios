@@ -89,15 +89,19 @@ class Text {
 	return this._surfSize;
     }
 
-    private void computeText () {	
+    private void computeText () {
+	if (this._texture) {
+	    this._texture.release ();
+	    this._texture = null;
+	}
+	
 	auto font = new SDLFont (Application.currentContext.sdlTtf, this._fontName, this._size);
 	if (this._text != "") {
 	    auto surface = font.renderTextSolid (this._text, SDL_Color (255, 255, 255));
 	    surface = surface.convert (SDL_AllocFormat (SDL_PIXELFORMAT_RGBA8888));
 	    this._surfSize = vec2f (surface.width, surface.height);
 	    this._texture = new Texture ("diffuse", surface, Application.currentContext);	    
-	} else this._texture = null;
-	
+	} 	
 	if (__shader__ is null) {
 	    __shader__ = new Shader (Application.currentContext.openglContext,
 				     vert, frag, true);
@@ -122,6 +126,7 @@ class Text {
 	    __shader__.use ();	
 	    __mesh__.draw ();
 	    __shader__.unuse ();
+	    this._texture.unuse ();
 	}
     }    
     

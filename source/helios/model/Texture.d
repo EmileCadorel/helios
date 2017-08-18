@@ -2,27 +2,25 @@ module helios.model.Texture;
 import helios.system._;
 import gfm.opengl, std.typecons;
 import gfm.sdl2, std.conv;
+import helios.utils.Singleton;
 
 class Texture {
     
     private GLTexture2D _texture;
     private Tuple!(int, "w", int, "h") _texSize;
     private static int _lastUnit_ = 0;
+    private static int _inUsage_ = 0;
     private int _texUnit;
     private string _type;
 
     this (string type, SDL2Surface surface, Application context) {
 	this._type = type;
 	this.setTexture (surface, context);
-	this._texUnit = _lastUnit_;
-	_lastUnit_ ++;
     }
     
     this (string type, string name, string path, Application context) {
 	this._type = type;
 	this.setTexture (name, path, context);
-	this._texUnit = _lastUnit_;
-	_lastUnit_++;
     }
     
     this (string type) {
@@ -80,11 +78,19 @@ class Texture {
     }
     
     void use (Shader shader) {
+	this._texUnit = _lastUnit_;
+	_lastUnit_ ++;	
+	_inUsage_ ++;
 	this._texture.use (this._texUnit);
 	shader.uniform (this._type).set (this._texUnit);
     }
 
-    void unuse () {	
+    void unuse () {
+	_inUsage_ --;
+	if (_inUsage_ == 0) 
+	    _lastUnit_ = 0;
+	
+	this._texUnit = -1;
     }
     
     private void loadImage (string path, ref SDL2Surface image, Application context) {
@@ -97,6 +103,8 @@ class Texture {
 	image = loader.load (path);
 	
     }
-    
-    
+
+    void release () {
+	delete this._texture;
+    }        
 }

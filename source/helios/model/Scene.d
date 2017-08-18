@@ -68,6 +68,8 @@ class Scene {
 	shader.use ();
 	this._mesh.draw ();
 	shader.unuse ();
+	if (this._mesh.tex !is null)
+	    this._mesh.tex.unuse ();
     }
    
 }

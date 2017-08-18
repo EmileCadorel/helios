@@ -3,7 +3,7 @@ import helios._;
 import std.container;
 import gfm.math;
 
-class D3View : Widget {
+class D3View : LoadWidget!D3View {
 
     private void delegate (Camera, Array!Scene) _routine;
 
@@ -19,6 +19,10 @@ class D3View : Widget {
 	this._routine = drawRoutine;
     }
 
+    this (void delegate (Camera, Array!Scene) drawRoutine) {
+	this._routine = drawRoutine;
+    }
+    
     ref Camera camera () {
 	return this._camera;
     }
@@ -40,8 +44,11 @@ class D3View : Widget {
     override bool is3D () {
 	return true;
     }
-    
+
     override void onDraw () {
+    }
+    
+    override void onDraw3D () {
 	Application.currentContext.window.setViewPort (this._position, this._size);
 	Application.currentContext.window.clearScissor (this._backGround, this._position, this._size);
 	this._routine (this._camera, this._scene);

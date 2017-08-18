@@ -3,7 +3,7 @@ import helios.gui._;
 import std.container, gfm.math;
 
 
-class Layout : Widget {
+class Layout (T) : LoadWidget!T {
 
     protected Array!Widget _widgets;
 
@@ -14,6 +14,11 @@ class Layout : Widget {
     }
 
     void addWidget (Widget widget) {
+	if (widget.isRelative) {
+	    widget.size = this.size * widget.relativeSize;
+	    widget.onResize ();
+	}
+	
 	widget.parent = this;
 	if (widget.is3D) this._widgets3D.insertBack (widget);
 	else this._widgets.insertBack (widget);
@@ -113,9 +118,13 @@ class Layout : Widget {
 	}
     }
 
-    void onDraw3D () {	
+    override void onDraw3D () {
+	foreach (it ; this._widgets) {
+	    if (!super.isFocused (it)) it.onDraw3D ();
+	}
+	
 	foreach (it ; this._widgets3D) {
-	    if (!super.isFocused (it)) it.draw ();
+	    if (!super.isFocused (it)) it.onDraw3D ();
 	}
     }
 

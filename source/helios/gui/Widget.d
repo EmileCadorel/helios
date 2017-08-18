@@ -6,6 +6,7 @@ public import helios.gui._;
 public import helios.gui.MainLayout;
 import gfm.math, gfm.opengl, gfm.assimp;
 import std.math, std.container;
+import std.json;
 
 private auto vertColor = q{
 #version 450 core
@@ -44,7 +45,45 @@ private auto fragColor = q{
 };
 
 
-class Widget {
+private template WidgetInsert (T : Widget) {
+    static this () {
+	static if (is (typeof (&T.load) : Widget function (JSONValue))) {
+	    import std.string;
+	    auto name = T.classinfo.name;
+	    auto begin = name.lastIndexOf (".");
+	    auto end = name.lastIndexOf ("!");
+	    if (begin != -1) name = name [begin + 1 .. $];
+	    if (end != -1) name = name [0 .. end];
+	    GUI.storeWidget (name, &T.load);
+	}
+    }
+}
+
+
+vec4f parseColor (JSONValue value) {
+    vec4f colr = vec4f (1, 1, 1, 1);
+    if (auto r = "r" in value) colr.x = r.floating;
+    if (auto r = "g" in value) colr.y = r.floating;
+    if (auto r = "b" in value) colr.z = r.floating;
+    if (auto r = "a" in value) colr.w = r.floating;
+    return colr;
+}
+
+vec2f parsePos (JSONValue value) {
+    vec2f pos = vec2f (0, 0);
+    if (auto x = "x" in value) pos.x = x.floating;
+    if (auto y = "y" in value) pos.y = y.floating;
+    return pos;
+}
+
+vec2f parseSize (JSONValue value) {
+    vec2f size = vec2f (0, 0);
+    if (auto w = "w" in value) size.x = w.floating;
+    if (auto w = "h" in value) size.y = w.floating;
+    return size;
+}
+
+class Widget  {
 
     private static Shader __color__;
 
@@ -54,6 +93,10 @@ class Widget {
 
     protected vec2f _size;
 
+    protected vec2f _relativeSize;
+
+    protected bool _isRelative;
+    
     private bool _clicked = false;
 
     private static Array!Widget __widgets__;
@@ -67,6 +110,8 @@ class Widget {
     private Widget _parent;
 
     private static MainLayout __GUI__;
+
+    private string _id;
 
     this () {
 	if (this.is3D)
@@ -132,10 +177,10 @@ class Widget {
 
     static void draw3D () {
 	__GUI__.onDraw3D ();
-	if (__focused__ && __focused__.is3D) __focused__.onDraw ();
+	if (__focused__ && __focused__.is3D) __focused__.onDraw3D ();
     }
 
-    static Layout mainLayout () {
+    static MainLayout mainLayout () {
 	return __GUI__;
     }
     
@@ -156,15 +201,25 @@ class Widget {
     }
     
     final void draw () {
-	this.onDraw ();
+	if (this.is3D) this.onDraw3D ();
+	else this.onDraw ();
     }
 
+           
     final bool isClicked () {
 	return this._clicked;
     }
 
     final void isClicked (bool value) {
 	this._clicked = value;
+    }
+
+    final protected void setId (string id) {
+	this._id = id;
+    }
+    
+    final string id () {
+	return this._id;
     }
     
     void onClick (MouseEvent) {}
@@ -183,6 +238,8 @@ class Widget {
 
     bool is3D () { return false; }
 
+    void onResize () {}
+    
     final void parent (Widget parent) {
 	this._parent = parent;
     }
@@ -193,12 +250,24 @@ class Widget {
     
     abstract void onDraw ();
 
+    void onDraw3D () {}
+    
     final void release () {
 	import std.algorithm;
 	auto it = __widgets__[].find!("a is b") (this);
 	if (!it.empty) {
 	    __widgets__.linearRemove (it);
 	}
+    }
+
+    final protected void setRelative (bool relative) {
+	this._isRelative = relative;
+	if (this._isRelative)
+	    this._relativeSize = this._size;
+    }
+
+    final bool isRelative () {
+	return this._isRelative;
     }
     
     private static void initColor () {
@@ -290,12 +359,21 @@ class Widget {
 	return this._position;
     }
     
-    vec2f size () {
+    const (vec2f) size () {
 	return this._size;
     }
 
     void size (vec2f size) {
 	this._size = size;
     }
+
+    vec2f relativeSize () {
+	return this._relativeSize;
+    }
     
+}
+
+
+class LoadWidget (T) : Widget {
+    mixin WidgetInsert!T;
 }

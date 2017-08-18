@@ -2,7 +2,7 @@ module helios.gui.Label;
 import helios._;
 import gfm.math;
 
-class Label : Widget {
+class Label : LoadWidget!Label {
 
     private Text _text;
 

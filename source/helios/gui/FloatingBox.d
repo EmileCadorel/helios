@@ -5,7 +5,7 @@ import helios.system._;
 import helios.model._;
 import std.stdio, gfm.math, std.datetime;
 
-class FloatingBox : Widget {
+class FloatingBox : LoadWidget!FloatingBox {
 
     private bool _closed;
     private Text _name;

@@ -3,7 +3,7 @@ import helios.gui._;
 import std.container, gfm.math;
 
 
-class LinearLayout : Layout {
+class LinearLayout : Layout!LinearLayout {
 
     public enum Gravity {
 	TOP,

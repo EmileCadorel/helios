@@ -122,7 +122,7 @@ class Application {
 	return this._config.font;
     }
 
-    Layout mainLayout () {
+    MainLayout mainLayout () {
 	return Widget.mainLayout;
     }
     
