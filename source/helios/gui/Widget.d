@@ -91,6 +91,8 @@ class Widget  {
     
     protected vec2f _position;
 
+    protected vec2f _relativePosition;
+    
     protected vec2f _size;
 
     protected vec2f _relativeSize;
@@ -112,6 +114,8 @@ class Widget  {
     private static MainLayout __GUI__;
 
     private string _id;
+
+    protected bool _isFloating;
 
     this () {
 	if (this.is3D)
@@ -151,9 +155,10 @@ class Widget  {
     static void clickStopSlot (int x, int y, MouseInfo info) {
 	if (__focused__ !is null) {
 	    if (__focused__._clicked) {
-		__focused__.onClickEnd (MouseEvent (x, y, info));		    		
+		__focused__.onClickEnd (MouseEvent (x, y, info));
 	    }
 	    __focused__._clicked = false;
+	    if (__focused__.is3D) Widget.setFocus (null);
 	}
     }
 
@@ -184,13 +189,13 @@ class Widget  {
 	return __GUI__;
     }
     
-    final void setFocus (Widget widget) {
+    final static void setFocus (Widget widget) {
 	if (__focused__) __focused__.onFocusLose ();
 	__focused__ = widget;
 	if (__focused__) __focused__.onFocusGain ();
     }
 
-    final void setHover (Widget widget, MouseEvent event) {
+    final static void setHover (Widget widget, MouseEvent event) {
 	if (__hovered__) __hovered__.onHoverEnd (event);
 	__hovered__ = widget;
 	if (__hovered__) __hovered__.onHover (event);
@@ -221,6 +226,8 @@ class Widget  {
     final string id () {
 	return this._id;
     }
+
+    
     
     void onClick (MouseEvent) {}
 
@@ -239,6 +246,11 @@ class Widget  {
     bool is3D () { return false; }
 
     void onResize () {}
+
+    Widget getFromId (string name) {
+	if (name == this.id) return this;
+	return null;
+    }
     
     final void parent (Widget parent) {
 	this._parent = parent;
@@ -262,12 +274,18 @@ class Widget  {
 
     final protected void setRelative (bool relative) {
 	this._isRelative = relative;
-	if (this._isRelative)
+	if (this._isRelative) {
 	    this._relativeSize = this._size;
+	    this._relativePosition = this._position;
+	}
     }
 
     final bool isRelative () {
 	return this._isRelative;
+    }
+
+    final bool isFloating () {
+	return this._isFloating;
     }
     
     private static void initColor () {
@@ -369,6 +387,10 @@ class Widget  {
 
     vec2f relativeSize () {
 	return this._relativeSize;
+    }
+
+    vec2f relativePosition () {
+	return this._relativePosition;
     }
     
 }

@@ -4,6 +4,8 @@ import helios.gui._;
 import helios.system._;
 import helios.model._;
 import std.stdio, gfm.math, std.datetime;
+import std.json, std.conv;
+import std.algorithm;
 
 class FloatingBox : LoadWidget!FloatingBox {
 
@@ -15,8 +17,37 @@ class FloatingBox : LoadWidget!FloatingBox {
 
     private vec2f _lastPos;
     private static immutable int ROD_SIZE = 20;
+
+    private int _textSize;
+    private float _relativeTextSize;
+    private vec4f _textColor;
+
+    private this (JSONValue value) {
+	this._isFloating = true;
+	string name;
+	if (auto x = "position" in value) this.innerPosition = parsePos (*x);
+	else this.innerPosition = vec2f (0, 0);
+	if (auto h = "size" in value) this._size = parseSize (*h);
+	if (auto t = "text" in value) name = t.str;
+	if (auto i = "id" in value) super.setId (i.str);
+	if (auto r = "relative" in value) super.setRelative (r.integer.to!bool);
+	if (auto col = "textColor" in value) this._textColor = parseColor (*col);
+	if (auto ts = "textSize" in value) {
+	    this._textSize = cast (int) ts.integer;
+	    this._name = new Text (this._textSize);
+	    this._name.color = this._textColor;
+	    this._name.text = name;
+	} else if (auto rts = "relativeTSize" in value) {
+	    this._textSize = -1;
+	    this._relativeTextSize = rts.floating;
+	    this._name = new Text (cast (int) (this._relativeTextSize * min (this._size.y, this._size.x)));
+	    this._name.color = this._textColor;
+	    this._name.text = name;
+	}
+    }
     
     this (vec2f pos, vec2f size, string name) {
+	this._isFloating = true;
 	this.position = pos;
 	this.size = size;
 	this._name = new Text (15);
@@ -42,6 +73,10 @@ class FloatingBox : LoadWidget!FloatingBox {
 	Application.currentContext.input.motion.disconnect (&this.move);
     }
 
+    override void onFocusLose () {
+	Application.currentContext.input.motion.disconnect (&this.move);
+    }
+    
     final void move (int x, int y, MouseInfo info) {
 	this._needClose = false;
 	this._position = vec2f (x, y) - this._lastPos;
@@ -60,9 +95,16 @@ class FloatingBox : LoadWidget!FloatingBox {
 	}	
        
     }
+
+    override void onResize () {	
+	if (this._textSize == -1) {
+	    auto text = this._name.text;
+	    this._name = new Text (cast (int) (this._relativeTextSize * min (this.size.y, this.size.x)));
+	    this._name.text = text;
+	}
+    }
     
     override void onClickRight (MouseEvent event) {
-	writeln ("FloatBox clicked");
     }
 
     override void onHover (MouseEvent event) {
@@ -80,4 +122,8 @@ class FloatingBox : LoadWidget!FloatingBox {
 	}
     }
 
+    static Widget load (JSONValue value) {
+	return new FloatingBox (value);
+    }
+    
 }

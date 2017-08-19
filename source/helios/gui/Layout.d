@@ -16,6 +16,7 @@ class Layout (T) : LoadWidget!T {
     void addWidget (Widget widget) {
 	if (widget.isRelative) {
 	    widget.size = this.size * widget.relativeSize;
+	    widget.innerPosition = this.size * widget.relativePosition;
 	    widget.onResize ();
 	}
 	
@@ -31,7 +32,7 @@ class Layout (T) : LoadWidget!T {
 	    if (pos.x <= x && pos.x + size.x >= x) {
 		if (pos.y <= y && pos.y + size.y >= y) {
 		    self.onClickRight (MouseEvent (x, y, info));
-		    break;
+		    return;
 		}
 	    }
 	}
@@ -42,7 +43,7 @@ class Layout (T) : LoadWidget!T {
 	    if (pos.x <= x && pos.x + size.x >= x) {
 		if (pos.y <= y && pos.y + size.y >= y) {
 		    self.onClickRight (MouseEvent (x, y, info));
-		    break;
+		    return;
 		}
 	    }	    
 	}	
@@ -57,7 +58,7 @@ class Layout (T) : LoadWidget!T {
 		    self.isClicked = true;
 		    super.setFocus (self);
 		    self.onClick (MouseEvent (x, y, info));
-		    break;
+		    return;
 		}	    
 	    }
 	}
@@ -70,7 +71,7 @@ class Layout (T) : LoadWidget!T {
 		    self.isClicked = true;
 		    super.setFocus (self);
 		    self.onClick (MouseEvent (x, y, info));
-		    break;
+		    return;
 		}	    
 	    }
 	}
@@ -83,7 +84,7 @@ class Layout (T) : LoadWidget!T {
 	    if (pos.x <= x && pos.x + size.x >= x) {
 		if (pos.y <= y && pos.y + size.y >= y) {
 		    super.setHover (self, MouseEvent (x, y, info));
-		    break;
+		    return;
 		}
 	    }
 	}
@@ -94,7 +95,7 @@ class Layout (T) : LoadWidget!T {
 	    if (pos.x <= x && pos.x + size.x >= x) {
 		if (pos.y <= y && pos.y + size.y >= y) {
 		    super.setHover (self, MouseEvent (x, y, info));
-		    break;
+		    return;
 		}
 	    }
 	}
@@ -128,6 +129,20 @@ class Layout (T) : LoadWidget!T {
 	}
     }
 
+    final override Widget getFromId (string name) {
+	if (this.id == name) return this;
+	foreach (it ; this._widgets3D) {
+	    auto got = it.getFromId (name);
+	    if (got) return got;
+	}
+
+	foreach (it ; this._widgets) {
+	    auto got = it.getFromId (name);
+	    if (got) return got;
+	}
+	return null;	    
+    }
+    
     void clear () {
 	this._widgets3D = make!(Array!Widget);
 	this._widgets = make!(Array!Widget);

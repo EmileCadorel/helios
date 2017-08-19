@@ -9,6 +9,7 @@ final class GridLayout : Layout!GridLayout {
     private float [][] _desc;
     private float [] _height;
     private Widget [][] _content;
+    private Array!Widget _floatings;
     
     private int _currentCol = 0;
     private int _currentRow = 0;
@@ -28,7 +29,7 @@ final class GridLayout : Layout!GridLayout {
 	    this._content = new Widget [][values.length];
 	    foreach (line ; 0 .. values.length) {
 		if (auto h = "height" in values [line]) this._height [line] = h.floating;
-		if (auto r = "rows" in values [line]) {
+		if (auto r = "cols" in values [line]) {
 		    auto rows = r.array;
 		    this._desc [line] = new float [rows.length];
 		    this._content [line] = new Widget [rows.length];
@@ -97,45 +98,62 @@ final class GridLayout : Layout!GridLayout {
 		    widg.size = vec2f (this._desc[row][col], this._height [row]) * this.size - vec2f (this._paddingWidth, this._paddingHeight);
 		    widg.position = pos + vec2f (this._paddingWidth / 2., this._paddingHeight / 2.);
 		    widg.onResize ();
-		}
-		
+		}		
 	    }
 	}
+
+	foreach (widget ; this._floatings) {
+	    if (widget.isRelative) {
+		widget.size = widget.relativeSize * this.size;
+		widget.innerPosition = widget.relativePosition * this.size;
+		widget.onResize ();
+	    }
+	}
+	
     }
     
     override void addWidget (Widget widget) {
 	super.addWidget (widget);
-	if (this._currentRow >= this._height.length)
-	    assert (false, "Plus de place");
-	
-	auto pos = vec2f (0, 0);
-	auto size = vec2f (this._desc [this._currentRow][this._currentCol] * this._size.x,
-			   this._height [this._currentRow] * this._size.y
-	);
-	
-	this._content [this._currentRow][this._currentCol] = widget;
-	
-	foreach (it ; 0 .. this._currentRow) {
-	    pos.y += this._height [it] * this._size.y;
-	}
+	if (!widget.isFloating) {
+	    if (this._currentRow >= this._height.length)
+		assert (false, "Plus de place");
 
-	foreach (it ; 0 .. this._currentCol) {
-	    pos.x += this._desc [this._currentRow][it] * this._size.x;
-	}
+	    auto pos = vec2f (0, 0);
+	    auto size = vec2f (this._desc [this._currentRow][this._currentCol] * this._size.x,
+			       this._height [this._currentRow] * this._size.y
+	    );
 	
-	this._currentCol ++;
-	if (this._currentCol >= this._desc [this._currentRow].length) {
-	    this._currentCol = 0;
-	    this._currentRow ++;
-	}
+	    this._content [this._currentRow][this._currentCol] = widget;
+	
+	    foreach (it ; 0 .. this._currentRow) {
+		pos.y += this._height [it] * this._size.y;
+	    }
 
-	widget.innerPosition = pos + vec2f (this._paddingWidth / 2., this._paddingHeight / 2.);
-	widget.size = size - vec2f (this._paddingWidth, this._paddingHeight);
+	    foreach (it ; 0 .. this._currentCol) {
+		pos.x += this._desc [this._currentRow][it] * this._size.x;
+	    }
+	
+	    this._currentCol ++;
+	    if (this._currentCol >= this._desc [this._currentRow].length) {
+		this._currentCol = 0;
+		this._currentRow ++;
+	    }
+
+	    widget.innerPosition = pos + vec2f (this._paddingWidth / 2., this._paddingHeight / 2.);
+	    widget.size = size - vec2f (this._paddingWidth, this._paddingHeight);
+	} else {
+	    this._floatings.insertBack (widget);
+	    if (widget.isRelative) {
+		widget.size = widget.relativeSize * this._size;
+		widget.innerPosition = widget.relativePosition * this.size;
+		widget.onResize ();
+	    }
+	}
     }
 
 
     override void onDraw () {
-	// super.drawQuad (this.position, this.size, vec4f (0.3, 0.2, 0.2, 0.2));
+	super.drawQuad (this.position, this.size, vec4f (0.3, 0.2, 0.2, 0.2));
 	super.onDraw ();
     }
 

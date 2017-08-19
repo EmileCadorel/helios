@@ -13,6 +13,7 @@ final class MainLayout : Layout!MainLayout {
 	foreach (it ; this._widgets) {
 	    if (it.isRelative) {
 		it.size = size * it.relativeSize;
+		it.innerPosition = size * it.relativePosition;
 		it.onResize ();
 	    }
 	}
@@ -20,9 +21,14 @@ final class MainLayout : Layout!MainLayout {
 	foreach (it ; this._widgets3D) {
 	    if (it.isRelative) {
 		it.size = size * it.relativeSize;
+		it.innerPosition = size * it.relativePosition;
 		it.onResize ();
 	    }		
 	}
+    }
+
+    Widget opDispatch (string name) () {
+	return this.getFromId (name);
     }
     
     override vec2f size () {

@@ -35,6 +35,7 @@ class Button : LoadWidget!Button {
 	    this._textSize = -1;
 	    this._relativeTextSize = rts.floating;
 	    this._name = new Text (cast (int) (this._relativeTextSize * min (this._size.y, this._size.x)));
+	    this._name.color = this._textColor;
 	    this._name.text = name;
 	}
 
@@ -90,7 +91,7 @@ class Button : LoadWidget!Button {
     }
 
     override void onResize () {	
-	if (this._textSize) {
+	if (this._textSize == -1) {
 	    auto text = this._name.text;
 	    this._name = new Text (cast (int) (this._relativeTextSize * min (this.size.y, this.size.x)));
 	    this._name.text = text;

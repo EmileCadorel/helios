@@ -47,6 +47,11 @@ class Camera {
 	this._far = far;
 	this._changed = true;
     }
+
+    void dim (float near, float far) {
+	this._near = near;
+	this._far = far;
+    }
     
     void ratio (float ratio) {
 	this._ratio = ratio;
@@ -58,6 +63,10 @@ class Camera {
 	this._changed = true;
     }
 
+    float fov () {
+	return this._fov;
+    }
+    
     void guide (Guide gui) {
 	this._guide = gui;
 	this._guide.inform (this);
