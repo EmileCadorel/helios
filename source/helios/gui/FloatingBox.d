@@ -32,26 +32,28 @@ class FloatingBox : LoadWidget!FloatingBox {
 	if (auto i = "id" in value) super.setId (i.str);
 	if (auto r = "relative" in value) super.setRelative (r.integer.to!bool);
 	if (auto col = "textColor" in value) this._textColor = parseColor (*col);
-	if (auto ts = "textSize" in value) {
-	    this._textSize = cast (int) ts.integer;
-	    this._name = new Text (this._textSize);
-	    this._name.color = this._textColor;
-	    this._name.text = name;
-	} else if (auto rts = "relativeTSize" in value) {
-	    this._textSize = -1;
-	    this._relativeTextSize = rts.floating;
-	    this._name = new Text (cast (int) (this._relativeTextSize * min (this._size.y, this._size.x)));
-	    this._name.color = this._textColor;
-	    this._name.text = name;
-	}
+	this._relativeTextSize = 0.9;
+	this._name = new Text (TextQuality.FAST);
+	this._name.color = this._textColor;
+	this._name.text = name;
+
+	auto ratio = this._name.size.x / this._name.size.y;
+	this._name.size.y = this._relativeTextSize * ROD_SIZE;
+	this._name.size.x = this._name.size.y * ratio;
+	
     }
     
     this (vec2f pos, vec2f size, string name) {
 	this._isFloating = true;
 	this.position = pos;
 	this.size = size;
-	this._name = new Text (15);
+	this._name = new Text (TextQuality.FAST);
 	this._name.text = name;
+	this._relativeTextSize = 0.9;
+	
+	auto ratio = this._name.size.x / this._name.size.y;
+	this._name.size.y = this._relativeTextSize * ROD_SIZE;
+	this._name.size.x = this._name.size.y * ratio;
     }
 
     override void onClick (MouseEvent event) {
@@ -94,14 +96,6 @@ class FloatingBox : LoadWidget!FloatingBox {
 	    }
 	}	
        
-    }
-
-    override void onResize () {	
-	if (this._textSize == -1) {
-	    auto text = this._name.text;
-	    this._name = new Text (cast (int) (this._relativeTextSize * min (this.size.y, this.size.x)));
-	    this._name.text = text;
-	}
     }
     
     override void onClickRight (MouseEvent event) {

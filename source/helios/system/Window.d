@@ -57,7 +57,7 @@ class Window {
 
 	this._window.setTitle (this._title);       
 
-	this._gl.reload ();
+	this._gl.reload (GLVersion.None, GLVersion.HighestSupported);
 	this._gl.debugCheck ();
 	this.defaultGLContext ();
 	this._sdlTtf = new SDLTTF (this._sdl2);

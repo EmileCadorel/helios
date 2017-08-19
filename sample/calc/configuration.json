@@ -1,0 +1,8 @@
+{
+    "name" : "Helios Calculator",
+    "font" : "fonts/Font.ttf",
+    "size" : { "width" : 400, "height" : 600 },
+    "activities" : {
+	"activities.MainActivity.MainActivity" : ["main"]
+    }	
+}

@@ -3,6 +3,7 @@ import gfm.sdl2, helios.system._;
 import std.stdio;
 import helios.model._;
 import gfm.math, gfm.opengl, gfm.assimp;
+import helios.utils.Singleton;
 
 private auto vert = q{
 #version 450 core
@@ -45,6 +46,37 @@ private auto frag = q{
     }
 };
 
+private class Font {
+
+    private SDLFont [string] _fonts;
+
+    SDLFont getFast (string name) {
+	auto it = (name ~ "fast") in this._fonts;
+	if (it is null) {
+	    auto font = new SDLFont (Application.currentContext.sdlTtf, name, 50);
+	    this._fonts[name ~ "fast"] = font;
+	    return font;
+	} else return *it;
+    }
+    
+    SDLFont getHighQuality (string name) {
+	auto it = (name ~ "high") in this._fonts;
+	if (it is null) {
+	    auto font = new SDLFont (Application.currentContext.sdlTtf, name, 255);
+	    this._fonts[name ~ "high"] = font;
+	    return font;
+	} else return *it;
+    }
+    
+    mixin Singleton;
+}
+
+
+enum TextQuality {
+    HIGH,
+    FAST
+}
+
 class Text {
 
     private static Mesh __mesh__;
@@ -56,16 +88,16 @@ class Text {
     private vec4f _color = vec4f (1, 1, 1, 1);
     private string _text;
     private string _fontName;
-    private int _size;
+    private TextQuality _quality;
+    private float _ratioX, _ratioY;
     
-    this (int size) {
+    this (TextQuality quality) {
 	this._fontName = Application.currentContext.systemFont;
-	this._size = size;
+	this._quality = quality;
     }
     
-    this (string fontName, int size) {
+    this (string fontName) {
 	this._fontName = fontName;
-	this._size = size;
     }
 
     void text (string other) {
@@ -85,8 +117,16 @@ class Text {
 	return this._position;
     }
 
-    vec2f size () {
+    ref vec2f size () {
 	return this._surfSize;
+    }
+
+    float ratioX () {
+	return this._ratioX;
+    }
+
+    float ratioY () {
+	return this._ratioY;
     }
 
     private void computeText () {
@@ -94,12 +134,18 @@ class Text {
 	    this._texture.release ();
 	    this._texture = null;
 	}
+	SDLFont font;
+	if (this._quality == TextQuality.HIGH)
+	    font = Font.instance.getHighQuality (this._fontName);
+	else font = Font.instance.getFast (this._fontName);
 	
-	auto font = new SDLFont (Application.currentContext.sdlTtf, this._fontName, this._size);
 	if (this._text != "") {
 	    auto surface = font.renderTextSolid (this._text, SDL_Color (255, 255, 255));
 	    surface = surface.convert (SDL_AllocFormat (SDL_PIXELFORMAT_RGBA8888));
 	    this._surfSize = vec2f (surface.width, surface.height);
+	    this._ratioX = this._surfSize.x / this._surfSize.y;
+	    this._ratioY = this._surfSize.y / this._surfSize.x;
+	    
 	    this._texture = new Texture ("diffuse", surface, Application.currentContext);	    
 	} 	
 	if (__shader__ is null) {
@@ -111,7 +157,6 @@ class Text {
 	}
        
     }
-    
     
     void draw () {
 	if (this._texture !is null) {

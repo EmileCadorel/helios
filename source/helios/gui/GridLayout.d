@@ -153,7 +153,7 @@ final class GridLayout : Layout!GridLayout {
 
 
     override void onDraw () {
-	super.drawQuad (this.position, this.size, vec4f (0.3, 0.2, 0.2, 0.2));
+	//super.drawQuad (this.position, this.size, vec4f (0.3, 0.2, 0.2, 0.2));
 	super.onDraw ();
     }
 
